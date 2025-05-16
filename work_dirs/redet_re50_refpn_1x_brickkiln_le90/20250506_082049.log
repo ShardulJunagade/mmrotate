@@ -1,0 +1,899 @@
+2025-05-06 08:20:49,831 - mmrotate - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.20 | packaged by conda-forge | (default, Sep 30 2024, 17:52:49) [GCC 13.3.0]
+CUDA available: True
+GPU 0: NVIDIA A100-SXM4-80GB
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 10.1, V10.1.24
+GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+PyTorch: 1.9.0+cu111
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.1.2 (Git Hash 98be7e8afa711dc9b66c8ff3504129cb82013cdb)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.1
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.1, CUDNN_VERSION=8.0.5, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.9.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.10.0+cu111
+OpenCV: 4.11.0
+MMCV: 1.7.2
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.1
+MMRotate: 0.3.4+b030f38
+------------------------------------------------------------
+
+2025-05-06 08:20:50,558 - mmrotate - INFO - Distributed training: True
+2025-05-06 08:20:51,266 - mmrotate - INFO - Config:
+dataset_type = 'BrickKilnDataset'
+data_root = '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='RResize', img_scale=(128, 128)),
+    dict(
+        type='RRandomFlip',
+        flip_ratio=[0.25, 0.25, 0.25],
+        direction=['horizontal', 'vertical', 'diagonal'],
+        version='le90'),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(128, 128),
+        flip=False,
+        transforms=[
+            dict(type='RResize'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=128,
+    workers_per_gpu=2,
+    train=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='RResize', img_scale=(128, 128)),
+            dict(
+                type='RRandomFlip',
+                flip_ratio=[0.25, 0.25, 0.25],
+                direction=['horizontal', 'vertical', 'diagonal'],
+                version='le90'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
+        version='le90'),
+    val=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='le90'),
+    test=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='le90'))
+evaluation = dict(interval=1, metric='mAP')
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.3333333333333333,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=25)
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+angle_version = 'le90'
+model = dict(
+    type='ReDet',
+    backbone=dict(
+        type='ReResNet',
+        depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        style='pytorch',
+        pretrained='work_dirs/pretrain/re_resnet50_c8_batch256-25b16846.pth'),
+    neck=dict(
+        type='ReFPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RotatedRPNHead',
+        in_channels=256,
+        feat_channels=256,
+        version='le90',
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(
+            type='SmoothL1Loss', beta=0.1111111111111111, loss_weight=1.0)),
+    roi_head=dict(
+        type='RoITransRoIHead',
+        version='le90',
+        num_stages=2,
+        stage_loss_weights=[1, 1],
+        bbox_roi_extractor=[
+            dict(
+                type='SingleRoIExtractor',
+                roi_layer=dict(
+                    type='RoIAlign', output_size=7, sampling_ratio=0),
+                out_channels=256,
+                featmap_strides=[4, 8, 16, 32]),
+            dict(
+                type='RotatedSingleRoIExtractor',
+                roi_layer=dict(
+                    type='RiRoIAlignRotated',
+                    out_size=7,
+                    num_samples=2,
+                    num_orientations=8,
+                    clockwise=True),
+                out_channels=256,
+                featmap_strides=[4, 8, 16, 32])
+        ],
+        bbox_head=[
+            dict(
+                type='RotatedShared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=3,
+                bbox_coder=dict(
+                    type='DeltaXYWHAHBBoxCoder',
+                    angle_range='le90',
+                    norm_factor=2,
+                    edge_swap=True,
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.1, 0.1, 0.2, 0.2, 1]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0)),
+            dict(
+                type='RotatedShared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=3,
+                bbox_coder=dict(
+                    type='DeltaXYWHAOBBoxCoder',
+                    angle_range='le90',
+                    norm_factor=None,
+                    edge_swap=True,
+                    proj_xy=True,
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.05, 0.05, 0.1, 0.1, 0.5]),
+                reg_class_agnostic=False,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
+        ]),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=0,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=[
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.5,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0.5,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1,
+                    iou_calculator=dict(type='BboxOverlaps2D')),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False),
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.5,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0.5,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1,
+                    iou_calculator=dict(type='RBboxOverlaps2D')),
+                sampler=dict(
+                    type='RRandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False)
+        ]),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            nms_pre=2000,
+            min_bbox_size=0,
+            score_thr=0.05,
+            nms=dict(iou_thr=0.1),
+            max_per_img=2000)))
+batch_size = 128
+num_epochs = 25
+work_dir = './work_dirs/redet_re50_refpn_1x_brickkiln_le90'
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2025-05-06 08:20:51,267 - mmrotate - INFO - Set random seed to 0, deterministic: False
+2025-05-06 08:23:51,919 - mmrotate - INFO - Start running, host: shardul.junagade@ramanujan, work_dir: /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/redet_re50_refpn_1x_brickkiln_le90
+2025-05-06 08:23:51,919 - mmrotate - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2025-05-06 08:23:51,919 - mmrotate - INFO - workflow: [('train', 1)], max: 25 epochs
+2025-05-06 08:23:51,919 - mmrotate - INFO - Checkpoints will be saved to /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/redet_re50_refpn_1x_brickkiln_le90 by HardDiskBackend.
+2025-05-06 08:25:53,541 - mmrotate - INFO - Epoch [1][50/366]	lr: 1.993e-03, eta: 6:07:26, time: 2.423, data_time: 0.193, memory: 14316, loss_rpn_cls: 0.1623, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.1465, s0.acc: 97.5914, s0.loss_bbox: 0.0097, s1.loss_cls: 0.1394, s1.acc: 97.5424, s1.loss_bbox: 0.0113, loss: 0.4692, grad_norm: 3.6102
+2025-05-06 08:27:32,896 - mmrotate - INFO - Epoch [1][100/366]	lr: 2.327e-03, eta: 5:32:34, time: 1.987, data_time: 0.111, memory: 14316, loss_rpn_cls: 0.0039, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0623, s0.acc: 99.7347, s0.loss_bbox: 0.0062, s1.loss_cls: 0.0233, s1.acc: 99.7363, s1.loss_bbox: 0.0038, loss: 0.0995, grad_norm: 0.2870
+2025-05-06 08:29:10,672 - mmrotate - INFO - Epoch [1][150/366]	lr: 2.660e-03, eta: 5:18:15, time: 1.956, data_time: 0.095, memory: 14316, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.1023, s0.acc: 99.7355, s0.loss_bbox: 0.0055, s1.loss_cls: 0.0199, s1.acc: 99.7375, s1.loss_bbox: 0.0029, loss: 0.1313, grad_norm: 0.1995
+2025-05-06 08:30:47,603 - mmrotate - INFO - Epoch [1][200/366]	lr: 2.993e-03, eta: 5:09:39, time: 1.939, data_time: 0.092, memory: 14316, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.1147, s0.acc: 99.7301, s0.loss_bbox: 0.0052, s1.loss_cls: 0.0186, s1.acc: 99.7320, s1.loss_bbox: 0.0026, loss: 0.1414, grad_norm: 0.2044
+2025-05-06 08:32:24,244 - mmrotate - INFO - Epoch [1][250/366]	lr: 3.327e-03, eta: 5:03:41, time: 1.933, data_time: 0.097, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.1078, s0.acc: 99.7372, s0.loss_bbox: 0.0047, s1.loss_cls: 0.0165, s1.acc: 99.7392, s1.loss_bbox: 0.0022, loss: 0.1316, grad_norm: 0.2070
+2025-05-06 08:34:00,338 - mmrotate - INFO - Epoch [1][300/366]	lr: 3.660e-03, eta: 4:58:53, time: 1.922, data_time: 0.078, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0908, s0.acc: 99.7321, s0.loss_bbox: 0.0046, s1.loss_cls: 0.0154, s1.acc: 99.7346, s1.loss_bbox: 0.0020, loss: 0.1129, grad_norm: 0.2071
+2025-05-06 08:35:36,016 - mmrotate - INFO - Epoch [1][350/366]	lr: 3.993e-03, eta: 4:54:50, time: 1.914, data_time: 0.071, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0679, s0.acc: 99.7400, s0.loss_bbox: 0.0042, s1.loss_cls: 0.0133, s1.acc: 99.7419, s1.loss_bbox: 0.0018, loss: 0.0874, grad_norm: 0.2033
+2025-05-06 08:36:06,584 - mmrotate - INFO - Saving checkpoint at 1 epochs
+2025-05-06 08:43:46,041 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 4639 | 0.000  | 0.000 |
+| Zigzag | 9050  | 4296 | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-06 08:43:46,677 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 08:43:46,678 - mmrotate - INFO - Epoch(val) [1][15590]	mAP: 0.0000
+2025-05-06 08:45:30,419 - mmrotate - INFO - Epoch [2][50/366]	lr: 4.433e-03, eta: 4:42:29, time: 2.074, data_time: 0.212, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0419, s0.acc: 99.7509, s0.loss_bbox: 0.0041, s1.loss_cls: 0.0110, s1.acc: 99.7568, s1.loss_bbox: 0.0016, loss: 0.0590, grad_norm: 0.1896
+2025-05-06 08:47:07,770 - mmrotate - INFO - Epoch [2][100/366]	lr: 4.767e-03, eta: 4:40:58, time: 1.947, data_time: 0.095, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0291, s0.acc: 99.7624, s0.loss_bbox: 0.0040, s1.loss_cls: 0.0094, s1.acc: 99.7725, s1.loss_bbox: 0.0015, loss: 0.0442, grad_norm: 0.1873
+2025-05-06 08:48:46,123 - mmrotate - INFO - Epoch [2][150/366]	lr: 5.000e-03, eta: 4:39:42, time: 1.967, data_time: 0.114, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0213, s0.acc: 99.7820, s0.loss_bbox: 0.0038, s1.loss_cls: 0.0081, s1.acc: 99.7938, s1.loss_bbox: 0.0014, loss: 0.0349, grad_norm: 0.1976
+2025-05-06 08:50:25,142 - mmrotate - INFO - Epoch [2][200/366]	lr: 5.000e-03, eta: 4:38:33, time: 1.980, data_time: 0.114, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0167, s0.acc: 99.7925, s0.loss_bbox: 0.0038, s1.loss_cls: 0.0072, s1.acc: 99.8063, s1.loss_bbox: 0.0013, loss: 0.0289, grad_norm: 0.1907
+2025-05-06 08:52:02,354 - mmrotate - INFO - Epoch [2][250/366]	lr: 5.000e-03, eta: 4:36:53, time: 1.944, data_time: 0.097, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0138, s0.acc: 99.8054, s0.loss_bbox: 0.0037, s1.loss_cls: 0.0065, s1.acc: 99.8172, s1.loss_bbox: 0.0012, loss: 0.0252, grad_norm: 0.1623
+2025-05-06 08:53:40,970 - mmrotate - INFO - Epoch [2][300/366]	lr: 5.000e-03, eta: 4:35:32, time: 1.972, data_time: 0.116, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0120, s0.acc: 99.8080, s0.loss_bbox: 0.0037, s1.loss_cls: 0.0061, s1.acc: 99.8216, s1.loss_bbox: 0.0011, loss: 0.0230, grad_norm: 0.1583
+2025-05-06 08:55:18,070 - mmrotate - INFO - Epoch [2][350/366]	lr: 5.000e-03, eta: 4:33:51, time: 1.942, data_time: 0.084, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0105, s0.acc: 99.8166, s0.loss_bbox: 0.0036, s1.loss_cls: 0.0058, s1.acc: 99.8256, s1.loss_bbox: 0.0010, loss: 0.0212, grad_norm: 0.1678
+2025-05-06 08:55:49,864 - mmrotate - INFO - Saving checkpoint at 2 epochs
+2025-05-06 09:03:02,228 - mmrotate - INFO - 
++--------+-------+-------+--------+-------+
+| class  | gts   | dets  | recall | ap    |
++--------+-------+-------+--------+-------+
+| CFCBK  | 649   | 54    | 0.000  | 0.000 |
+| FCBK   | 11134 | 10790 | 0.001  | 0.000 |
+| Zigzag | 9050  | 6255  | 0.001  | 0.000 |
++--------+-------+-------+--------+-------+
+| mAP    |       |       |        | 0.000 |
++--------+-------+-------+--------+-------+
+2025-05-06 09:03:02,621 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 09:03:02,621 - mmrotate - INFO - Epoch(val) [2][15590]	mAP: 0.0002
+2025-05-06 09:04:45,138 - mmrotate - INFO - Epoch [3][50/366]	lr: 5.000e-03, eta: 4:27:03, time: 2.049, data_time: 0.190, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0092, s0.acc: 99.8260, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0055, s1.acc: 99.8353, s1.loss_bbox: 0.0010, loss: 0.0192, grad_norm: 0.1728
+2025-05-06 09:06:24,453 - mmrotate - INFO - Epoch [3][100/366]	lr: 5.000e-03, eta: 4:26:03, time: 1.986, data_time: 0.130, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0084, s0.acc: 99.8308, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0054, s1.acc: 99.8393, s1.loss_bbox: 0.0009, loss: 0.0182, grad_norm: 0.1710
+2025-05-06 09:08:01,741 - mmrotate - INFO - Epoch [3][150/366]	lr: 5.000e-03, eta: 4:24:39, time: 1.946, data_time: 0.086, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0079, s0.acc: 99.8259, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0053, s1.acc: 99.8327, s1.loss_bbox: 0.0009, loss: 0.0177, grad_norm: 0.1553
+2025-05-06 09:09:38,889 - mmrotate - INFO - Epoch [3][200/366]	lr: 5.000e-03, eta: 4:23:13, time: 1.943, data_time: 0.093, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0075, s0.acc: 99.8349, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0051, s1.acc: 99.8401, s1.loss_bbox: 0.0009, loss: 0.0169, grad_norm: 0.1381
+2025-05-06 09:11:16,577 - mmrotate - INFO - Epoch [3][250/366]	lr: 5.000e-03, eta: 4:21:50, time: 1.954, data_time: 0.093, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0072, s0.acc: 99.8342, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0050, s1.acc: 99.8425, s1.loss_bbox: 0.0008, loss: 0.0165, grad_norm: 0.1224
+2025-05-06 09:12:55,414 - mmrotate - INFO - Epoch [3][300/366]	lr: 5.000e-03, eta: 4:20:35, time: 1.977, data_time: 0.108, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0070, s0.acc: 99.8354, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0050, s1.acc: 99.8455, s1.loss_bbox: 0.0008, loss: 0.0163, grad_norm: 0.1605
+2025-05-06 09:14:32,257 - mmrotate - INFO - Epoch [3][350/366]	lr: 5.000e-03, eta: 4:19:03, time: 1.937, data_time: 0.081, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0066, s0.acc: 99.8390, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0049, s1.acc: 99.8436, s1.loss_bbox: 0.0008, loss: 0.0159, grad_norm: 0.1399
+2025-05-06 09:15:03,370 - mmrotate - INFO - Saving checkpoint at 3 epochs
+2025-05-06 09:22:24,483 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 115  | 0.000  | 0.000 |
+| FCBK   | 11134 | 8359 | 0.001  | 0.001 |
+| Zigzag | 9050  | 4401 | 0.002  | 0.003 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.002 |
++--------+-------+------+--------+-------+
+2025-05-06 09:22:25,038 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 09:22:25,039 - mmrotate - INFO - Epoch(val) [3][15590]	mAP: 0.0015
+2025-05-06 09:24:06,859 - mmrotate - INFO - Epoch [4][50/366]	lr: 5.000e-03, eta: 4:13:59, time: 2.035, data_time: 0.180, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0064, s0.acc: 99.8385, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0049, s1.acc: 99.8471, s1.loss_bbox: 0.0008, loss: 0.0155, grad_norm: 0.1345
+2025-05-06 09:25:42,757 - mmrotate - INFO - Epoch [4][100/366]	lr: 5.000e-03, eta: 4:12:28, time: 1.918, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0061, s0.acc: 99.8428, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0049, s1.acc: 99.8454, s1.loss_bbox: 0.0008, loss: 0.0151, grad_norm: 0.1510
+2025-05-06 09:27:18,544 - mmrotate - INFO - Epoch [4][150/366]	lr: 5.000e-03, eta: 4:10:56, time: 1.916, data_time: 0.069, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0060, s0.acc: 99.8424, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0047, s1.acc: 99.8493, s1.loss_bbox: 0.0007, loss: 0.0150, grad_norm: 0.1362
+2025-05-06 09:28:54,330 - mmrotate - INFO - Epoch [4][200/366]	lr: 5.000e-03, eta: 4:09:24, time: 1.916, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0062, s0.acc: 99.8352, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0049, s1.acc: 99.8446, s1.loss_bbox: 0.0007, loss: 0.0154, grad_norm: 0.1529
+2025-05-06 09:30:30,303 - mmrotate - INFO - Epoch [4][250/366]	lr: 5.000e-03, eta: 4:07:53, time: 1.919, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0059, s0.acc: 99.8413, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0046, s1.acc: 99.8480, s1.loss_bbox: 0.0007, loss: 0.0145, grad_norm: 0.1720
+2025-05-06 09:32:06,009 - mmrotate - INFO - Epoch [4][300/366]	lr: 5.000e-03, eta: 4:06:20, time: 1.914, data_time: 0.069, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0058, s0.acc: 99.8440, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0047, s1.acc: 99.8495, s1.loss_bbox: 0.0007, loss: 0.0145, grad_norm: 0.1556
+2025-05-06 09:33:41,712 - mmrotate - INFO - Epoch [4][350/366]	lr: 5.000e-03, eta: 4:04:46, time: 1.914, data_time: 0.065, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0058, s0.acc: 99.8449, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0046, s1.acc: 99.8531, s1.loss_bbox: 0.0008, loss: 0.0148, grad_norm: 0.1685
+2025-05-06 09:34:12,998 - mmrotate - INFO - Saving checkpoint at 4 epochs
+2025-05-06 09:41:54,135 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 160  | 0.003  | 0.002 |
+| FCBK   | 11134 | 7459 | 0.004  | 0.023 |
+| Zigzag | 9050  | 4047 | 0.006  | 0.005 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.010 |
++--------+-------+------+--------+-------+
+2025-05-06 09:41:54,558 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 09:41:54,559 - mmrotate - INFO - Epoch(val) [4][15590]	mAP: 0.0100
+2025-05-06 09:43:36,191 - mmrotate - INFO - Epoch [5][50/366]	lr: 5.000e-03, eta: 4:00:38, time: 2.032, data_time: 0.161, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0058, s0.acc: 99.8418, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8518, s1.loss_bbox: 0.0007, loss: 0.0146, grad_norm: 0.1816
+2025-05-06 09:45:13,442 - mmrotate - INFO - Epoch [5][100/366]	lr: 5.000e-03, eta: 3:59:16, time: 1.945, data_time: 0.076, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0057, s0.acc: 99.8432, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0046, s1.acc: 99.8482, s1.loss_bbox: 0.0007, loss: 0.0144, grad_norm: 0.1823
+2025-05-06 09:46:49,793 - mmrotate - INFO - Epoch [5][150/366]	lr: 5.000e-03, eta: 3:57:50, time: 1.927, data_time: 0.070, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0054, s0.acc: 99.8482, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8533, s1.loss_bbox: 0.0008, loss: 0.0140, grad_norm: 0.1452
+2025-05-06 09:48:26,054 - mmrotate - INFO - Epoch [5][200/366]	lr: 5.000e-03, eta: 3:56:22, time: 1.925, data_time: 0.074, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0053, s0.acc: 99.8514, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8561, s1.loss_bbox: 0.0007, loss: 0.0135, grad_norm: 0.1497
+2025-05-06 09:50:02,527 - mmrotate - INFO - Epoch [5][250/366]	lr: 5.000e-03, eta: 3:54:55, time: 1.929, data_time: 0.076, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0055, s0.acc: 99.8429, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0046, s1.acc: 99.8470, s1.loss_bbox: 0.0008, loss: 0.0145, grad_norm: 0.1543
+2025-05-06 09:51:40,252 - mmrotate - INFO - Epoch [5][300/366]	lr: 5.000e-03, eta: 3:53:33, time: 1.954, data_time: 0.092, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0055, s0.acc: 99.8471, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0046, s1.acc: 99.8513, s1.loss_bbox: 0.0008, loss: 0.0144, grad_norm: 0.1438
+2025-05-06 09:53:18,087 - mmrotate - INFO - Epoch [5][350/366]	lr: 5.000e-03, eta: 3:52:10, time: 1.957, data_time: 0.083, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0054, s0.acc: 99.8452, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8511, s1.loss_bbox: 0.0008, loss: 0.0141, grad_norm: 0.1477
+2025-05-06 09:53:50,231 - mmrotate - INFO - Saving checkpoint at 5 epochs
+2025-05-06 10:01:28,882 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 120  | 0.000  | 0.000 |
+| FCBK   | 11134 | 5550 | 0.005  | 0.003 |
+| Zigzag | 9050  | 3227 | 0.008  | 0.010 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.004 |
++--------+-------+------+--------+-------+
+2025-05-06 10:01:29,366 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 10:01:29,367 - mmrotate - INFO - Epoch(val) [5][15590]	mAP: 0.0045
+2025-05-06 10:03:38,878 - mmrotate - INFO - Epoch [6][50/366]	lr: 5.000e-03, eta: 3:50:20, time: 2.589, data_time: 0.208, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0053, s0.acc: 99.8475, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8561, s1.loss_bbox: 0.0008, loss: 0.0137, grad_norm: 0.1645
+2025-05-06 10:05:58,844 - mmrotate - INFO - Epoch [6][100/366]	lr: 5.000e-03, eta: 3:51:33, time: 2.799, data_time: 0.156, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0054, s0.acc: 99.8455, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8513, s1.loss_bbox: 0.0009, loss: 0.0143, grad_norm: 0.1611
+2025-05-06 10:08:23,811 - mmrotate - INFO - Epoch [6][150/366]	lr: 5.000e-03, eta: 3:52:54, time: 2.899, data_time: 0.159, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0052, s0.acc: 99.8492, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8555, s1.loss_bbox: 0.0009, loss: 0.0139, grad_norm: 0.1846
+2025-05-06 10:10:53,659 - mmrotate - INFO - Epoch [6][200/366]	lr: 5.000e-03, eta: 3:54:20, time: 2.997, data_time: 0.172, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0057, s0.acc: 99.8380, s0.loss_bbox: 0.0036, s1.loss_cls: 0.0045, s1.acc: 99.8513, s1.loss_bbox: 0.0010, loss: 0.0149, grad_norm: 0.2442
+2025-05-06 10:13:25,739 - mmrotate - INFO - Epoch [6][250/366]	lr: 5.000e-03, eta: 3:55:43, time: 3.042, data_time: 0.166, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0054, s0.acc: 99.8442, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8502, s1.loss_bbox: 0.0010, loss: 0.0142, grad_norm: 0.2515
+2025-05-06 10:16:00,934 - mmrotate - INFO - Epoch [6][300/366]	lr: 5.000e-03, eta: 3:57:04, time: 3.104, data_time: 0.157, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0056, s0.acc: 99.8394, s0.loss_bbox: 0.0036, s1.loss_cls: 0.0046, s1.acc: 99.8497, s1.loss_bbox: 0.0011, loss: 0.0151, grad_norm: 0.1747
+2025-05-06 10:18:36,459 - mmrotate - INFO - Epoch [6][350/366]	lr: 5.000e-03, eta: 3:58:16, time: 3.111, data_time: 0.175, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0055, s0.acc: 99.8398, s0.loss_bbox: 0.0036, s1.loss_cls: 0.0046, s1.acc: 99.8490, s1.loss_bbox: 0.0012, loss: 0.0150, grad_norm: 0.2212
+2025-05-06 10:19:30,475 - mmrotate - INFO - Saving checkpoint at 6 epochs
+2025-05-06 10:33:17,653 - mmrotate - INFO - 
++--------+-------+-------+--------+-------+
+| class  | gts   | dets  | recall | ap    |
++--------+-------+-------+--------+-------+
+| CFCBK  | 649   | 304   | 0.014  | 0.091 |
+| FCBK   | 11134 | 10966 | 0.014  | 0.009 |
+| Zigzag | 9050  | 6394  | 0.021  | 0.045 |
++--------+-------+-------+--------+-------+
+| mAP    |       |       |        | 0.048 |
++--------+-------+-------+--------+-------+
+2025-05-06 10:33:18,121 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 10:33:18,122 - mmrotate - INFO - Epoch(val) [6][15590]	mAP: 0.0483
+2025-05-06 10:35:55,292 - mmrotate - INFO - Epoch [7][50/366]	lr: 5.000e-03, eta: 3:57:08, time: 3.141, data_time: 0.253, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0052, s0.acc: 99.8474, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8518, s1.loss_bbox: 0.0011, loss: 0.0141, grad_norm: 0.1615
+2025-05-06 10:38:27,597 - mmrotate - INFO - Epoch [7][100/366]	lr: 5.000e-03, eta: 3:57:52, time: 3.046, data_time: 0.165, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0053, s0.acc: 99.8456, s0.loss_bbox: 0.0035, s1.loss_cls: 0.0044, s1.acc: 99.8511, s1.loss_bbox: 0.0012, loss: 0.0144, grad_norm: 0.1808
+2025-05-06 10:41:03,572 - mmrotate - INFO - Epoch [7][150/366]	lr: 5.000e-03, eta: 3:58:38, time: 3.120, data_time: 0.172, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0051, s0.acc: 99.8499, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8513, s1.loss_bbox: 0.0012, loss: 0.0142, grad_norm: 0.1591
+2025-05-06 10:43:31,963 - mmrotate - INFO - Epoch [7][200/366]	lr: 5.000e-03, eta: 3:58:54, time: 2.968, data_time: 0.150, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0054, s0.acc: 99.8440, s0.loss_bbox: 0.0035, s1.loss_cls: 0.0045, s1.acc: 99.8525, s1.loss_bbox: 0.0013, loss: 0.0149, grad_norm: 0.1726
+2025-05-06 10:45:56,217 - mmrotate - INFO - Epoch [7][250/366]	lr: 5.000e-03, eta: 3:58:53, time: 2.885, data_time: 0.142, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8522, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8534, s1.loss_bbox: 0.0012, loss: 0.0136, grad_norm: 0.1495
+2025-05-06 10:48:25,535 - mmrotate - INFO - Epoch [7][300/366]	lr: 5.000e-03, eta: 3:58:59, time: 2.986, data_time: 0.154, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8571, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8576, s1.loss_bbox: 0.0011, loss: 0.0134, grad_norm: 0.1477
+2025-05-06 10:50:56,122 - mmrotate - INFO - Epoch [7][350/366]	lr: 5.000e-03, eta: 3:59:02, time: 3.012, data_time: 0.151, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8563, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8560, s1.loss_bbox: 0.0012, loss: 0.0138, grad_norm: 0.1499
+2025-05-06 10:51:46,651 - mmrotate - INFO - Saving checkpoint at 7 epochs
+2025-05-06 11:05:47,723 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 186  | 0.009  | 0.008 |
+| FCBK   | 11134 | 8935 | 0.018  | 0.014 |
+| Zigzag | 9050  | 4983 | 0.026  | 0.016 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.013 |
++--------+-------+------+--------+-------+
+2025-05-06 11:05:48,072 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 11:05:48,073 - mmrotate - INFO - Epoch(val) [7][15590]	mAP: 0.0129
+2025-05-06 11:08:36,866 - mmrotate - INFO - Epoch [8][50/366]	lr: 5.000e-03, eta: 3:57:43, time: 3.375, data_time: 0.271, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8528, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8509, s1.loss_bbox: 0.0014, loss: 0.0138, grad_norm: 0.1600
+2025-05-06 11:11:16,295 - mmrotate - INFO - Epoch [8][100/366]	lr: 5.000e-03, eta: 3:57:56, time: 3.189, data_time: 0.187, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0050, s0.acc: 99.8524, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8524, s1.loss_bbox: 0.0013, loss: 0.0140, grad_norm: 0.1468
+2025-05-06 11:13:47,528 - mmrotate - INFO - Epoch [8][150/366]	lr: 5.000e-03, eta: 3:57:44, time: 3.025, data_time: 0.142, memory: 14316, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8582, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8577, s1.loss_bbox: 0.0014, loss: 0.0142, grad_norm: 0.1642
+2025-05-06 11:16:17,500 - mmrotate - INFO - Epoch [8][200/366]	lr: 5.000e-03, eta: 3:57:24, time: 2.999, data_time: 0.145, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0049, s0.acc: 99.8557, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8551, s1.loss_bbox: 0.0014, loss: 0.0140, grad_norm: 0.1911
+2025-05-06 11:18:48,249 - mmrotate - INFO - Epoch [8][250/366]	lr: 5.000e-03, eta: 3:57:01, time: 3.015, data_time: 0.157, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0050, s0.acc: 99.8524, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8535, s1.loss_bbox: 0.0014, loss: 0.0143, grad_norm: 0.1684
+2025-05-06 11:21:33,049 - mmrotate - INFO - Epoch [8][300/366]	lr: 5.000e-03, eta: 3:57:04, time: 3.296, data_time: 0.162, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0050, s0.acc: 99.8493, s0.loss_bbox: 0.0034, s1.loss_cls: 0.0045, s1.acc: 99.8516, s1.loss_bbox: 0.0016, loss: 0.0146, grad_norm: 0.1813
+2025-05-06 11:24:06,567 - mmrotate - INFO - Epoch [8][350/366]	lr: 5.000e-03, eta: 3:56:38, time: 3.070, data_time: 0.157, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8594, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8575, s1.loss_bbox: 0.0014, loss: 0.0136, grad_norm: 0.1464
+2025-05-06 11:24:47,248 - mmrotate - INFO - Saving checkpoint at 8 epochs
+2025-05-06 11:31:57,389 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 288  | 0.012  | 0.003 |
+| FCBK   | 11134 | 9548 | 0.024  | 0.036 |
+| Zigzag | 9050  | 5542 | 0.033  | 0.018 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.019 |
++--------+-------+------+--------+-------+
+2025-05-06 11:31:57,748 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 11:31:57,749 - mmrotate - INFO - Epoch(val) [8][15590]	mAP: 0.0191
+2025-05-06 11:33:37,979 - mmrotate - INFO - Epoch [9][50/366]	lr: 5.000e-04, eta: 3:52:24, time: 2.004, data_time: 0.147, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8619, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0042, s1.acc: 99.8580, s1.loss_bbox: 0.0014, loss: 0.0133, grad_norm: 0.1205
+2025-05-06 11:35:14,672 - mmrotate - INFO - Epoch [9][100/366]	lr: 5.000e-04, eta: 3:49:58, time: 1.934, data_time: 0.079, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8602, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8554, s1.loss_bbox: 0.0015, loss: 0.0135, grad_norm: 0.1055
+2025-05-06 11:36:50,645 - mmrotate - INFO - Epoch [9][150/366]	lr: 5.000e-04, eta: 3:47:32, time: 1.919, data_time: 0.065, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8601, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8549, s1.loss_bbox: 0.0015, loss: 0.0136, grad_norm: 0.1120
+2025-05-06 11:38:26,732 - mmrotate - INFO - Epoch [9][200/366]	lr: 5.000e-04, eta: 3:45:08, time: 1.922, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8571, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8569, s1.loss_bbox: 0.0014, loss: 0.0139, grad_norm: 0.1239
+2025-05-06 11:40:02,769 - mmrotate - INFO - Epoch [9][250/366]	lr: 5.000e-04, eta: 3:42:46, time: 1.921, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8590, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8537, s1.loss_bbox: 0.0015, loss: 0.0135, grad_norm: 0.1202
+2025-05-06 11:41:38,901 - mmrotate - INFO - Epoch [9][300/366]	lr: 5.000e-04, eta: 3:40:25, time: 1.923, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8557, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8545, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1165
+2025-05-06 11:43:15,040 - mmrotate - INFO - Epoch [9][350/366]	lr: 5.000e-04, eta: 3:38:06, time: 1.923, data_time: 0.065, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8546, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8532, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1151
+2025-05-06 11:43:45,816 - mmrotate - INFO - Saving checkpoint at 9 epochs
+2025-05-06 11:52:48,637 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 186  | 0.014  | 0.005 |
+| FCBK   | 11134 | 6186 | 0.024  | 0.023 |
+| Zigzag | 9050  | 4336 | 0.030  | 0.014 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.014 |
++--------+-------+------+--------+-------+
+2025-05-06 11:52:49,308 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 11:52:49,310 - mmrotate - INFO - Epoch(val) [9][15590]	mAP: 0.0139
+2025-05-06 11:55:19,847 - mmrotate - INFO - Epoch [10][50/366]	lr: 5.000e-04, eta: 3:35:44, time: 3.008, data_time: 0.253, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8599, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8549, s1.loss_bbox: 0.0015, loss: 0.0139, grad_norm: 0.1176
+2025-05-06 11:57:22,420 - mmrotate - INFO - Epoch [10][100/366]	lr: 5.000e-04, eta: 3:34:12, time: 2.451, data_time: 0.125, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8573, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8539, s1.loss_bbox: 0.0015, loss: 0.0141, grad_norm: 0.1119
+2025-05-06 11:59:01,692 - mmrotate - INFO - Epoch [10][150/366]	lr: 5.000e-04, eta: 3:31:59, time: 1.985, data_time: 0.111, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8557, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8550, s1.loss_bbox: 0.0015, loss: 0.0141, grad_norm: 0.1250
+2025-05-06 12:00:39,245 - mmrotate - INFO - Epoch [10][200/366]	lr: 5.000e-04, eta: 3:29:45, time: 1.951, data_time: 0.090, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8552, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8524, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1226
+2025-05-06 12:02:16,099 - mmrotate - INFO - Epoch [10][250/366]	lr: 5.000e-04, eta: 3:27:31, time: 1.937, data_time: 0.081, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8581, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8527, s1.loss_bbox: 0.0015, loss: 0.0138, grad_norm: 0.1185
+2025-05-06 12:03:52,694 - mmrotate - INFO - Epoch [10][300/366]	lr: 5.000e-04, eta: 3:25:18, time: 1.932, data_time: 0.079, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8561, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8527, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1207
+2025-05-06 12:05:29,198 - mmrotate - INFO - Epoch [10][350/366]	lr: 5.000e-04, eta: 3:23:05, time: 1.930, data_time: 0.077, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8618, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8578, s1.loss_bbox: 0.0015, loss: 0.0136, grad_norm: 0.1205
+2025-05-06 12:06:00,200 - mmrotate - INFO - Saving checkpoint at 10 epochs
+2025-05-06 12:13:11,654 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 270  | 0.012  | 0.006 |
+| FCBK   | 11134 | 8669 | 0.025  | 0.020 |
+| Zigzag | 9050  | 5702 | 0.036  | 0.023 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.016 |
++--------+-------+------+--------+-------+
+2025-05-06 12:13:11,769 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 12:13:11,770 - mmrotate - INFO - Epoch(val) [10][15590]	mAP: 0.0163
+2025-05-06 12:14:52,907 - mmrotate - INFO - Epoch [11][50/366]	lr: 5.000e-04, eta: 3:19:33, time: 2.022, data_time: 0.153, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8573, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8543, s1.loss_bbox: 0.0015, loss: 0.0136, grad_norm: 0.1248
+2025-05-06 12:16:29,711 - mmrotate - INFO - Epoch [11][100/366]	lr: 5.000e-04, eta: 3:17:24, time: 1.936, data_time: 0.079, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8617, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8553, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1119
+2025-05-06 12:18:05,883 - mmrotate - INFO - Epoch [11][150/366]	lr: 5.000e-04, eta: 3:15:15, time: 1.923, data_time: 0.071, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8582, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8542, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1132
+2025-05-06 12:19:42,151 - mmrotate - INFO - Epoch [11][200/366]	lr: 5.000e-04, eta: 3:13:07, time: 1.925, data_time: 0.071, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8591, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8583, s1.loss_bbox: 0.0015, loss: 0.0134, grad_norm: 0.1083
+2025-05-06 12:21:18,539 - mmrotate - INFO - Epoch [11][250/366]	lr: 5.000e-04, eta: 3:11:00, time: 1.928, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8575, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8564, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1312
+2025-05-06 12:22:54,859 - mmrotate - INFO - Epoch [11][300/366]	lr: 5.000e-04, eta: 3:08:54, time: 1.926, data_time: 0.071, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8563, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8524, s1.loss_bbox: 0.0016, loss: 0.0144, grad_norm: 0.1248
+2025-05-06 12:24:31,248 - mmrotate - INFO - Epoch [11][350/366]	lr: 5.000e-04, eta: 3:06:48, time: 1.928, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8520, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8500, s1.loss_bbox: 0.0017, loss: 0.0144, grad_norm: 0.1197
+2025-05-06 12:25:02,186 - mmrotate - INFO - Saving checkpoint at 11 epochs
+2025-05-06 12:32:32,499 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 224  | 0.022  | 0.045 |
+| FCBK   | 11134 | 6783 | 0.023  | 0.015 |
+| Zigzag | 9050  | 4589 | 0.032  | 0.017 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.026 |
++--------+-------+------+--------+-------+
+2025-05-06 12:32:33,310 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 12:32:33,311 - mmrotate - INFO - Epoch(val) [11][15590]	mAP: 0.0259
+2025-05-06 12:34:14,210 - mmrotate - INFO - Epoch [12][50/366]	lr: 5.000e-05, eta: 3:03:30, time: 2.017, data_time: 0.149, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8585, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8545, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1097
+2025-05-06 12:35:50,570 - mmrotate - INFO - Epoch [12][100/366]	lr: 5.000e-05, eta: 3:01:27, time: 1.927, data_time: 0.072, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8611, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8544, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1067
+2025-05-06 12:37:27,042 - mmrotate - INFO - Epoch [12][150/366]	lr: 5.000e-05, eta: 2:59:25, time: 1.929, data_time: 0.071, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8587, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8528, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1187
+2025-05-06 12:39:03,799 - mmrotate - INFO - Epoch [12][200/366]	lr: 5.000e-05, eta: 2:57:23, time: 1.935, data_time: 0.073, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8582, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8535, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1030
+2025-05-06 12:40:40,849 - mmrotate - INFO - Epoch [12][250/366]	lr: 5.000e-05, eta: 2:55:22, time: 1.941, data_time: 0.079, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0044, s0.acc: 99.8600, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8564, s1.loss_bbox: 0.0016, loss: 0.0133, grad_norm: 0.1057
+2025-05-06 12:42:17,081 - mmrotate - INFO - Epoch [12][300/366]	lr: 5.000e-05, eta: 2:53:21, time: 1.925, data_time: 0.074, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8535, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8502, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1143
+2025-05-06 12:43:53,865 - mmrotate - INFO - Epoch [12][350/366]	lr: 5.000e-05, eta: 2:51:22, time: 1.936, data_time: 0.073, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8574, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8523, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1120
+2025-05-06 12:44:24,946 - mmrotate - INFO - Saving checkpoint at 12 epochs
+2025-05-06 12:51:44,841 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 241  | 0.017  | 0.007 |
+| FCBK   | 11134 | 7410 | 0.024  | 0.015 |
+| Zigzag | 9050  | 4954 | 0.034  | 0.030 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.018 |
++--------+-------+------+--------+-------+
+2025-05-06 12:51:45,275 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 12:51:45,276 - mmrotate - INFO - Epoch(val) [12][15590]	mAP: 0.0175
+2025-05-06 12:53:27,069 - mmrotate - INFO - Epoch [13][50/366]	lr: 5.000e-05, eta: 2:48:17, time: 2.035, data_time: 0.171, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8609, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8593, s1.loss_bbox: 0.0015, loss: 0.0136, grad_norm: 0.1098
+2025-05-06 12:55:04,972 - mmrotate - INFO - Epoch [13][100/366]	lr: 5.000e-05, eta: 2:46:20, time: 1.958, data_time: 0.097, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8581, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8532, s1.loss_bbox: 0.0017, loss: 0.0142, grad_norm: 0.1040
+2025-05-06 12:56:41,924 - mmrotate - INFO - Epoch [13][150/366]	lr: 5.000e-05, eta: 2:44:22, time: 1.939, data_time: 0.085, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8592, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8556, s1.loss_bbox: 0.0015, loss: 0.0137, grad_norm: 0.1111
+2025-05-06 12:58:18,137 - mmrotate - INFO - Epoch [13][200/366]	lr: 5.000e-05, eta: 2:42:24, time: 1.924, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8597, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8532, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1131
+2025-05-06 12:59:54,209 - mmrotate - INFO - Epoch [13][250/366]	lr: 5.000e-05, eta: 2:40:27, time: 1.921, data_time: 0.069, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8540, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8516, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1099
+2025-05-06 13:01:30,168 - mmrotate - INFO - Epoch [13][300/366]	lr: 5.000e-05, eta: 2:38:30, time: 1.919, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8563, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8548, s1.loss_bbox: 0.0016, loss: 0.0143, grad_norm: 0.1153
+2025-05-06 13:03:06,384 - mmrotate - INFO - Epoch [13][350/366]	lr: 5.000e-05, eta: 2:36:34, time: 1.924, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8574, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8527, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1173
+2025-05-06 13:03:37,206 - mmrotate - INFO - Saving checkpoint at 13 epochs
+2025-05-06 13:10:52,299 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 230  | 0.015  | 0.009 |
+| FCBK   | 11134 | 7260 | 0.023  | 0.013 |
+| Zigzag | 9050  | 4797 | 0.032  | 0.030 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.017 |
++--------+-------+------+--------+-------+
+2025-05-06 13:10:53,101 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 13:10:53,102 - mmrotate - INFO - Epoch(val) [13][15590]	mAP: 0.0174
+2025-05-06 13:12:35,063 - mmrotate - INFO - Epoch [14][50/366]	lr: 5.000e-05, eta: 2:33:38, time: 2.038, data_time: 0.174, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8603, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8561, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1101
+2025-05-06 13:14:11,021 - mmrotate - INFO - Epoch [14][100/366]	lr: 5.000e-05, eta: 2:31:43, time: 1.919, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8567, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8525, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1147
+2025-05-06 13:15:47,015 - mmrotate - INFO - Epoch [14][150/366]	lr: 5.000e-05, eta: 2:29:48, time: 1.920, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8570, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8530, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1161
+2025-05-06 13:17:23,029 - mmrotate - INFO - Epoch [14][200/366]	lr: 5.000e-05, eta: 2:27:54, time: 1.920, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8529, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0046, s1.acc: 99.8491, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1083
+2025-05-06 13:18:59,025 - mmrotate - INFO - Epoch [14][250/366]	lr: 5.000e-05, eta: 2:26:00, time: 1.920, data_time: 0.069, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8573, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8515, s1.loss_bbox: 0.0016, loss: 0.0143, grad_norm: 0.1116
+2025-05-06 13:20:35,023 - mmrotate - INFO - Epoch [14][300/366]	lr: 5.000e-05, eta: 2:24:06, time: 1.920, data_time: 0.070, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8604, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8528, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1094
+2025-05-06 13:22:11,084 - mmrotate - INFO - Epoch [14][350/366]	lr: 5.000e-05, eta: 2:22:13, time: 1.921, data_time: 0.069, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8583, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8519, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1117
+2025-05-06 13:22:41,884 - mmrotate - INFO - Saving checkpoint at 14 epochs
+2025-05-06 13:30:02,762 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 223  | 0.015  | 0.008 |
+| FCBK   | 11134 | 7101 | 0.023  | 0.015 |
+| Zigzag | 9050  | 4765 | 0.033  | 0.030 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.018 |
++--------+-------+------+--------+-------+
+2025-05-06 13:30:03,052 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 13:30:03,053 - mmrotate - INFO - Epoch(val) [14][15590]	mAP: 0.0178
+2025-05-06 13:31:44,399 - mmrotate - INFO - Epoch [15][50/366]	lr: 5.000e-05, eta: 2:19:24, time: 2.026, data_time: 0.176, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0049, s0.acc: 99.8543, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8497, s1.loss_bbox: 0.0018, loss: 0.0144, grad_norm: 0.1111
+2025-05-06 13:33:20,452 - mmrotate - INFO - Epoch [15][100/366]	lr: 5.000e-05, eta: 2:17:32, time: 1.921, data_time: 0.070, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8582, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8539, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1137
+2025-05-06 13:34:56,240 - mmrotate - INFO - Epoch [15][150/366]	lr: 5.000e-05, eta: 2:15:40, time: 1.916, data_time: 0.070, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8577, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8546, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1127
+2025-05-06 13:36:32,105 - mmrotate - INFO - Epoch [15][200/366]	lr: 5.000e-05, eta: 2:13:49, time: 1.917, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8610, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8549, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1045
+2025-05-06 13:38:07,933 - mmrotate - INFO - Epoch [15][250/366]	lr: 5.000e-05, eta: 2:11:57, time: 1.917, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0049, s0.acc: 99.8527, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8533, s1.loss_bbox: 0.0017, loss: 0.0147, grad_norm: 0.1141
+2025-05-06 13:39:43,869 - mmrotate - INFO - Epoch [15][300/366]	lr: 5.000e-05, eta: 2:10:06, time: 1.919, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8575, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8535, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1092
+2025-05-06 13:41:19,716 - mmrotate - INFO - Epoch [15][350/366]	lr: 5.000e-05, eta: 2:08:16, time: 1.917, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8605, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8531, s1.loss_bbox: 0.0016, loss: 0.0137, grad_norm: 0.1164
+2025-05-06 13:41:50,555 - mmrotate - INFO - Saving checkpoint at 15 epochs
+2025-05-06 13:49:10,046 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 239  | 0.018  | 0.006 |
+| FCBK   | 11134 | 7227 | 0.024  | 0.014 |
+| Zigzag | 9050  | 4776 | 0.032  | 0.028 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.016 |
++--------+-------+------+--------+-------+
+2025-05-06 13:49:10,845 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 13:49:10,846 - mmrotate - INFO - Epoch(val) [15][15590]	mAP: 0.0158
+2025-05-06 13:50:53,335 - mmrotate - INFO - Epoch [16][50/366]	lr: 5.000e-05, eta: 2:05:34, time: 2.049, data_time: 0.193, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8583, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8551, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1095
+2025-05-06 13:52:31,518 - mmrotate - INFO - Epoch [16][100/366]	lr: 5.000e-05, eta: 2:03:46, time: 1.964, data_time: 0.099, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8566, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8511, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1070
+2025-05-06 13:54:08,983 - mmrotate - INFO - Epoch [16][150/366]	lr: 5.000e-05, eta: 2:01:57, time: 1.949, data_time: 0.094, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8572, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8553, s1.loss_bbox: 0.0016, loss: 0.0143, grad_norm: 0.1097
+2025-05-06 13:55:46,531 - mmrotate - INFO - Epoch [16][200/366]	lr: 5.000e-05, eta: 2:00:09, time: 1.951, data_time: 0.094, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8565, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8535, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1108
+2025-05-06 13:57:23,678 - mmrotate - INFO - Epoch [16][250/366]	lr: 5.000e-05, eta: 1:58:21, time: 1.943, data_time: 0.089, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8580, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8530, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1148
+2025-05-06 13:59:01,288 - mmrotate - INFO - Epoch [16][300/366]	lr: 5.000e-05, eta: 1:56:33, time: 1.952, data_time: 0.096, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8580, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8532, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1109
+2025-05-06 14:00:39,027 - mmrotate - INFO - Epoch [16][350/366]	lr: 5.000e-05, eta: 1:54:45, time: 1.955, data_time: 0.097, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8588, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8525, s1.loss_bbox: 0.0016, loss: 0.0136, grad_norm: 0.1037
+2025-05-06 14:01:10,437 - mmrotate - INFO - Saving checkpoint at 16 epochs
+2025-05-06 14:08:47,933 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 236  | 0.015  | 0.007 |
+| FCBK   | 11134 | 7265 | 0.023  | 0.012 |
+| Zigzag | 9050  | 4865 | 0.033  | 0.030 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.016 |
++--------+-------+------+--------+-------+
+2025-05-06 14:08:48,123 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 14:08:48,124 - mmrotate - INFO - Epoch(val) [16][15590]	mAP: 0.0164
+2025-05-06 14:10:30,106 - mmrotate - INFO - Epoch [17][50/366]	lr: 5.000e-05, eta: 1:52:08, time: 2.039, data_time: 0.168, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8573, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8538, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1090
+2025-05-06 14:12:08,593 - mmrotate - INFO - Epoch [17][100/366]	lr: 5.000e-05, eta: 1:50:22, time: 1.970, data_time: 0.110, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8577, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8535, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1137
+2025-05-06 14:13:46,187 - mmrotate - INFO - Epoch [17][150/366]	lr: 5.000e-05, eta: 1:48:35, time: 1.952, data_time: 0.091, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8603, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8542, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1062
+2025-05-06 14:15:23,508 - mmrotate - INFO - Epoch [17][200/366]	lr: 5.000e-05, eta: 1:46:48, time: 1.946, data_time: 0.085, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8572, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8542, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1157
+2025-05-06 14:17:01,150 - mmrotate - INFO - Epoch [17][250/366]	lr: 5.000e-05, eta: 1:45:02, time: 1.953, data_time: 0.092, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8553, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8496, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1142
+2025-05-06 14:18:38,525 - mmrotate - INFO - Epoch [17][300/366]	lr: 5.000e-05, eta: 1:43:15, time: 1.947, data_time: 0.081, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8584, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8531, s1.loss_bbox: 0.0017, loss: 0.0144, grad_norm: 0.1117
+2025-05-06 14:20:16,057 - mmrotate - INFO - Epoch [17][350/366]	lr: 5.000e-05, eta: 1:41:29, time: 1.951, data_time: 0.095, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8591, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8540, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1109
+2025-05-06 14:20:47,375 - mmrotate - INFO - Saving checkpoint at 17 epochs
+2025-05-06 14:28:03,026 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 217  | 0.017  | 0.008 |
+| FCBK   | 11134 | 7316 | 0.024  | 0.013 |
+| Zigzag | 9050  | 4820 | 0.032  | 0.030 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.017 |
++--------+-------+------+--------+-------+
+2025-05-06 14:28:03,363 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 14:28:03,364 - mmrotate - INFO - Epoch(val) [17][15590]	mAP: 0.0169
+2025-05-06 14:29:44,374 - mmrotate - INFO - Epoch [18][50/366]	lr: 5.000e-05, eta: 1:38:56, time: 2.019, data_time: 0.170, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8596, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8554, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1018
+2025-05-06 14:31:20,866 - mmrotate - INFO - Epoch [18][100/366]	lr: 5.000e-05, eta: 1:37:10, time: 1.930, data_time: 0.074, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8572, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8546, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1061
+2025-05-06 14:32:56,799 - mmrotate - INFO - Epoch [18][150/366]	lr: 5.000e-05, eta: 1:35:24, time: 1.919, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8586, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8559, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1030
+2025-05-06 14:34:32,816 - mmrotate - INFO - Epoch [18][200/366]	lr: 5.000e-05, eta: 1:33:38, time: 1.920, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8592, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8532, s1.loss_bbox: 0.0017, loss: 0.0142, grad_norm: 0.1130
+2025-05-06 14:36:08,860 - mmrotate - INFO - Epoch [18][250/366]	lr: 5.000e-05, eta: 1:31:52, time: 1.921, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0049, s0.acc: 99.8531, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0046, s1.acc: 99.8500, s1.loss_bbox: 0.0016, loss: 0.0146, grad_norm: 0.1141
+2025-05-06 14:37:44,919 - mmrotate - INFO - Epoch [18][300/366]	lr: 5.000e-05, eta: 1:30:06, time: 1.921, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8597, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8553, s1.loss_bbox: 0.0015, loss: 0.0139, grad_norm: 0.1149
+2025-05-06 14:39:20,830 - mmrotate - INFO - Epoch [18][350/366]	lr: 5.000e-05, eta: 1:28:21, time: 1.918, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8568, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8534, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1112
+2025-05-06 14:39:51,841 - mmrotate - INFO - Saving checkpoint at 18 epochs
+2025-05-06 14:47:07,575 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 228  | 0.015  | 0.030 |
+| FCBK   | 11134 | 7576 | 0.024  | 0.013 |
+| Zigzag | 9050  | 4999 | 0.034  | 0.030 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.024 |
++--------+-------+------+--------+-------+
+2025-05-06 14:47:08,310 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 14:47:08,311 - mmrotate - INFO - Epoch(val) [18][15590]	mAP: 0.0244
+2025-05-06 14:48:50,460 - mmrotate - INFO - Epoch [19][50/366]	lr: 5.000e-05, eta: 1:25:52, time: 2.042, data_time: 0.179, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8603, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8545, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1124
+2025-05-06 14:50:27,519 - mmrotate - INFO - Epoch [19][100/366]	lr: 5.000e-05, eta: 1:24:08, time: 1.941, data_time: 0.081, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8602, s0.loss_bbox: 0.0030, s1.loss_cls: 0.0043, s1.acc: 99.8557, s1.loss_bbox: 0.0016, loss: 0.0135, grad_norm: 0.1029
+2025-05-06 14:52:04,551 - mmrotate - INFO - Epoch [19][150/366]	lr: 5.000e-05, eta: 1:22:23, time: 1.941, data_time: 0.083, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8567, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8530, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1063
+2025-05-06 14:53:43,100 - mmrotate - INFO - Epoch [19][200/366]	lr: 5.000e-05, eta: 1:20:39, time: 1.971, data_time: 0.109, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8593, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8561, s1.loss_bbox: 0.0016, loss: 0.0143, grad_norm: 0.1081
+2025-05-06 14:55:20,796 - mmrotate - INFO - Epoch [19][250/366]	lr: 5.000e-05, eta: 1:18:55, time: 1.954, data_time: 0.092, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8575, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8535, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1115
+2025-05-06 14:56:58,293 - mmrotate - INFO - Epoch [19][300/366]	lr: 5.000e-05, eta: 1:17:11, time: 1.950, data_time: 0.088, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8554, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8518, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1060
+2025-05-06 14:58:35,794 - mmrotate - INFO - Epoch [19][350/366]	lr: 5.000e-05, eta: 1:15:27, time: 1.950, data_time: 0.094, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8557, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8510, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1139
+2025-05-06 14:59:07,371 - mmrotate - INFO - Saving checkpoint at 19 epochs
+2025-05-06 15:06:21,688 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 215  | 0.011  | 0.013 |
+| FCBK   | 11134 | 6881 | 0.023  | 0.017 |
+| Zigzag | 9050  | 4565 | 0.032  | 0.033 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.021 |
++--------+-------+------+--------+-------+
+2025-05-06 15:06:22,235 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 15:06:22,236 - mmrotate - INFO - Epoch(val) [19][15590]	mAP: 0.0211
+2025-05-06 15:08:04,056 - mmrotate - INFO - Epoch [20][50/366]	lr: 5.000e-05, eta: 1:13:02, time: 2.035, data_time: 0.174, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8633, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8559, s1.loss_bbox: 0.0016, loss: 0.0136, grad_norm: 0.1044
+2025-05-06 15:09:40,867 - mmrotate - INFO - Epoch [20][100/366]	lr: 5.000e-05, eta: 1:11:18, time: 1.936, data_time: 0.080, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8571, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8537, s1.loss_bbox: 0.0017, loss: 0.0144, grad_norm: 0.1131
+2025-05-06 15:11:17,131 - mmrotate - INFO - Epoch [20][150/366]	lr: 5.000e-05, eta: 1:09:34, time: 1.925, data_time: 0.071, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8572, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8528, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1050
+2025-05-06 15:12:54,030 - mmrotate - INFO - Epoch [20][200/366]	lr: 5.000e-05, eta: 1:07:51, time: 1.938, data_time: 0.078, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8538, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0046, s1.acc: 99.8481, s1.loss_bbox: 0.0018, loss: 0.0145, grad_norm: 0.1145
+2025-05-06 15:14:30,845 - mmrotate - INFO - Epoch [20][250/366]	lr: 5.000e-05, eta: 1:06:08, time: 1.936, data_time: 0.077, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8572, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8523, s1.loss_bbox: 0.0018, loss: 0.0143, grad_norm: 0.1096
+2025-05-06 15:16:07,756 - mmrotate - INFO - Epoch [20][300/366]	lr: 5.000e-05, eta: 1:04:24, time: 1.938, data_time: 0.079, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8574, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8504, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1079
+2025-05-06 15:17:44,805 - mmrotate - INFO - Epoch [20][350/366]	lr: 5.000e-05, eta: 1:02:41, time: 1.941, data_time: 0.083, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8612, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8554, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1035
+2025-05-06 15:18:15,930 - mmrotate - INFO - Saving checkpoint at 20 epochs
+2025-05-06 15:25:37,992 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 209  | 0.017  | 0.018 |
+| FCBK   | 11134 | 7150 | 0.023  | 0.014 |
+| Zigzag | 9050  | 4769 | 0.034  | 0.045 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.026 |
++--------+-------+------+--------+-------+
+2025-05-06 15:25:38,703 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 15:25:38,703 - mmrotate - INFO - Epoch(val) [20][15590]	mAP: 0.0259
+2025-05-06 15:27:19,254 - mmrotate - INFO - Epoch [21][50/366]	lr: 5.000e-05, eta: 1:00:19, time: 2.010, data_time: 0.149, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8557, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8530, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1112
+2025-05-06 15:28:56,237 - mmrotate - INFO - Epoch [21][100/366]	lr: 5.000e-05, eta: 0:58:36, time: 1.940, data_time: 0.084, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8594, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8541, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1050
+2025-05-06 15:30:33,099 - mmrotate - INFO - Epoch [21][150/366]	lr: 5.000e-05, eta: 0:56:53, time: 1.937, data_time: 0.080, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8531, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8501, s1.loss_bbox: 0.0017, loss: 0.0142, grad_norm: 0.1100
+2025-05-06 15:32:10,654 - mmrotate - INFO - Epoch [21][200/366]	lr: 5.000e-05, eta: 0:55:11, time: 1.951, data_time: 0.093, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8567, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8540, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1189
+2025-05-06 15:33:46,858 - mmrotate - INFO - Epoch [21][250/366]	lr: 5.000e-05, eta: 0:53:28, time: 1.924, data_time: 0.069, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8578, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8550, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1046
+2025-05-06 15:35:23,189 - mmrotate - INFO - Epoch [21][300/366]	lr: 5.000e-05, eta: 0:51:45, time: 1.927, data_time: 0.074, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8591, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0043, s1.acc: 99.8571, s1.loss_bbox: 0.0017, loss: 0.0139, grad_norm: 0.1075
+2025-05-06 15:37:00,065 - mmrotate - INFO - Epoch [21][350/366]	lr: 5.000e-05, eta: 0:50:03, time: 1.938, data_time: 0.075, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8548, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8526, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1108
+2025-05-06 15:37:31,049 - mmrotate - INFO - Saving checkpoint at 21 epochs
+2025-05-06 15:44:41,634 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 221  | 0.011  | 0.006 |
+| FCBK   | 11134 | 7461 | 0.024  | 0.018 |
+| Zigzag | 9050  | 4944 | 0.034  | 0.032 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.019 |
++--------+-------+------+--------+-------+
+2025-05-06 15:44:42,265 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 15:44:42,266 - mmrotate - INFO - Epoch(val) [21][15590]	mAP: 0.0186
+2025-05-06 15:46:24,010 - mmrotate - INFO - Epoch [22][50/366]	lr: 5.000e-05, eta: 0:47:43, time: 2.034, data_time: 0.161, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8553, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8527, s1.loss_bbox: 0.0017, loss: 0.0142, grad_norm: 0.1173
+2025-05-06 15:48:02,180 - mmrotate - INFO - Epoch [22][100/366]	lr: 5.000e-05, eta: 0:46:01, time: 1.963, data_time: 0.095, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8553, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8508, s1.loss_bbox: 0.0017, loss: 0.0145, grad_norm: 0.1099
+2025-05-06 15:49:41,744 - mmrotate - INFO - Epoch [22][150/366]	lr: 5.000e-05, eta: 0:44:20, time: 1.991, data_time: 0.109, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8565, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8526, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1096
+2025-05-06 15:51:21,206 - mmrotate - INFO - Epoch [22][200/366]	lr: 5.000e-05, eta: 0:42:38, time: 1.989, data_time: 0.109, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8594, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8533, s1.loss_bbox: 0.0016, loss: 0.0139, grad_norm: 0.1051
+2025-05-06 15:52:59,295 - mmrotate - INFO - Epoch [22][250/366]	lr: 5.000e-05, eta: 0:40:57, time: 1.962, data_time: 0.098, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8609, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8550, s1.loss_bbox: 0.0017, loss: 0.0139, grad_norm: 0.1048
+2025-05-06 15:54:37,362 - mmrotate - INFO - Epoch [22][300/366]	lr: 5.000e-05, eta: 0:39:15, time: 1.961, data_time: 0.097, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8619, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8555, s1.loss_bbox: 0.0017, loss: 0.0138, grad_norm: 0.1054
+2025-05-06 15:56:15,205 - mmrotate - INFO - Epoch [22][350/366]	lr: 5.000e-05, eta: 0:37:33, time: 1.957, data_time: 0.095, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8569, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0045, s1.acc: 99.8528, s1.loss_bbox: 0.0018, loss: 0.0142, grad_norm: 0.1045
+2025-05-06 15:56:46,522 - mmrotate - INFO - Saving checkpoint at 22 epochs
+2025-05-06 16:04:10,627 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 216  | 0.011  | 0.006 |
+| FCBK   | 11134 | 7001 | 0.023  | 0.015 |
+| Zigzag | 9050  | 4680 | 0.034  | 0.045 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.022 |
++--------+-------+------+--------+-------+
+2025-05-06 16:04:10,738 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 16:04:10,738 - mmrotate - INFO - Epoch(val) [22][15590]	mAP: 0.0221
+2025-05-06 16:05:52,127 - mmrotate - INFO - Epoch [23][50/366]	lr: 5.000e-05, eta: 0:35:16, time: 2.027, data_time: 0.156, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8584, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8535, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1102
+2025-05-06 16:07:29,645 - mmrotate - INFO - Epoch [23][100/366]	lr: 5.000e-05, eta: 0:33:34, time: 1.950, data_time: 0.080, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8573, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8547, s1.loss_bbox: 0.0016, loss: 0.0141, grad_norm: 0.1067
+2025-05-06 16:09:07,022 - mmrotate - INFO - Epoch [23][150/366]	lr: 5.000e-05, eta: 0:31:53, time: 1.948, data_time: 0.078, memory: 14316, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8607, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0043, s1.acc: 99.8566, s1.loss_bbox: 0.0017, loss: 0.0139, grad_norm: 0.1030
+2025-05-06 16:10:43,185 - mmrotate - INFO - Epoch [23][200/366]	lr: 5.000e-05, eta: 0:30:11, time: 1.923, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8556, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8555, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1103
+2025-05-06 16:12:19,319 - mmrotate - INFO - Epoch [23][250/366]	lr: 5.000e-05, eta: 0:28:30, time: 1.923, data_time: 0.074, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0048, s0.acc: 99.8551, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8511, s1.loss_bbox: 0.0017, loss: 0.0142, grad_norm: 0.1135
+2025-05-06 16:13:55,466 - mmrotate - INFO - Epoch [23][300/366]	lr: 5.000e-05, eta: 0:26:49, time: 1.923, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8562, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0045, s1.acc: 99.8522, s1.loss_bbox: 0.0017, loss: 0.0143, grad_norm: 0.1048
+2025-05-06 16:15:31,487 - mmrotate - INFO - Epoch [23][350/366]	lr: 5.000e-05, eta: 0:25:07, time: 1.920, data_time: 0.068, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8592, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8546, s1.loss_bbox: 0.0016, loss: 0.0137, grad_norm: 0.1089
+2025-05-06 16:16:02,518 - mmrotate - INFO - Saving checkpoint at 23 epochs
+2025-05-06 16:23:25,391 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 214  | 0.012  | 0.011 |
+| FCBK   | 11134 | 6977 | 0.024  | 0.014 |
+| Zigzag | 9050  | 4655 | 0.033  | 0.061 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.029 |
++--------+-------+------+--------+-------+
+2025-05-06 16:23:25,542 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 16:23:25,543 - mmrotate - INFO - Epoch(val) [23][15590]	mAP: 0.0287
+2025-05-06 16:25:07,979 - mmrotate - INFO - Epoch [24][50/366]	lr: 5.000e-05, eta: 0:22:52, time: 2.048, data_time: 0.178, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8596, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8543, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1173
+2025-05-06 16:26:45,210 - mmrotate - INFO - Epoch [24][100/366]	lr: 5.000e-05, eta: 0:21:11, time: 1.945, data_time: 0.076, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0049, s0.acc: 99.8510, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0046, s1.acc: 99.8465, s1.loss_bbox: 0.0017, loss: 0.0145, grad_norm: 0.1107
+2025-05-06 16:28:21,887 - mmrotate - INFO - Epoch [24][150/366]	lr: 5.000e-05, eta: 0:19:30, time: 1.934, data_time: 0.075, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8614, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8526, s1.loss_bbox: 0.0017, loss: 0.0138, grad_norm: 0.1106
+2025-05-06 16:29:57,935 - mmrotate - INFO - Epoch [24][200/366]	lr: 5.000e-05, eta: 0:17:49, time: 1.921, data_time: 0.065, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8582, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0043, s1.acc: 99.8547, s1.loss_bbox: 0.0017, loss: 0.0137, grad_norm: 0.1119
+2025-05-06 16:31:34,566 - mmrotate - INFO - Epoch [24][250/366]	lr: 5.000e-05, eta: 0:16:09, time: 1.933, data_time: 0.073, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8573, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8531, s1.loss_bbox: 0.0016, loss: 0.0140, grad_norm: 0.1107
+2025-05-06 16:33:10,983 - mmrotate - INFO - Epoch [24][300/366]	lr: 5.000e-05, eta: 0:14:28, time: 1.928, data_time: 0.067, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8564, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8535, s1.loss_bbox: 0.0015, loss: 0.0140, grad_norm: 0.1084
+2025-05-06 16:34:47,034 - mmrotate - INFO - Epoch [24][350/366]	lr: 5.000e-05, eta: 0:12:47, time: 1.921, data_time: 0.066, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8614, s0.loss_bbox: 0.0030, s1.loss_cls: 0.0044, s1.acc: 99.8557, s1.loss_bbox: 0.0016, loss: 0.0138, grad_norm: 0.1106
+2025-05-06 16:35:18,037 - mmrotate - INFO - Saving checkpoint at 24 epochs
+2025-05-06 16:42:57,573 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 219  | 0.014  | 0.030 |
+| FCBK   | 11134 | 6979 | 0.022  | 0.017 |
+| Zigzag | 9050  | 4637 | 0.033  | 0.052 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.033 |
++--------+-------+------+--------+-------+
+2025-05-06 16:42:58,077 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 16:42:58,078 - mmrotate - INFO - Epoch(val) [24][15590]	mAP: 0.0329
+2025-05-06 16:44:40,869 - mmrotate - INFO - Epoch [25][50/366]	lr: 5.000e-05, eta: 0:10:33, time: 2.055, data_time: 0.181, memory: 14316, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8601, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8559, s1.loss_bbox: 0.0016, loss: 0.0142, grad_norm: 0.1106
+2025-05-06 16:46:19,977 - mmrotate - INFO - Epoch [25][100/366]	lr: 5.000e-05, eta: 0:08:53, time: 1.982, data_time: 0.111, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0045, s0.acc: 99.8618, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0044, s1.acc: 99.8553, s1.loss_bbox: 0.0017, loss: 0.0138, grad_norm: 0.1080
+2025-05-06 16:47:58,076 - mmrotate - INFO - Epoch [25][150/366]	lr: 5.000e-05, eta: 0:07:13, time: 1.962, data_time: 0.100, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8574, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0044, s1.acc: 99.8556, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1111
+2025-05-06 16:49:37,833 - mmrotate - INFO - Epoch [25][200/366]	lr: 5.000e-05, eta: 0:05:32, time: 1.995, data_time: 0.114, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8578, s0.loss_bbox: 0.0033, s1.loss_cls: 0.0044, s1.acc: 99.8548, s1.loss_bbox: 0.0017, loss: 0.0141, grad_norm: 0.1128
+2025-05-06 16:51:15,807 - mmrotate - INFO - Epoch [25][250/366]	lr: 5.000e-05, eta: 0:03:52, time: 1.959, data_time: 0.091, memory: 14316, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0047, s0.acc: 99.8590, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8529, s1.loss_bbox: 0.0017, loss: 0.0140, grad_norm: 0.1068
+2025-05-06 16:52:52,905 - mmrotate - INFO - Epoch [25][300/366]	lr: 5.000e-05, eta: 0:02:12, time: 1.942, data_time: 0.076, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0049, s0.acc: 99.8528, s0.loss_bbox: 0.0032, s1.loss_cls: 0.0046, s1.acc: 99.8487, s1.loss_bbox: 0.0016, loss: 0.0144, grad_norm: 0.1132
+2025-05-06 16:54:29,922 - mmrotate - INFO - Epoch [25][350/366]	lr: 5.000e-05, eta: 0:00:32, time: 1.940, data_time: 0.077, memory: 14316, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0046, s0.acc: 99.8571, s0.loss_bbox: 0.0031, s1.loss_cls: 0.0045, s1.acc: 99.8522, s1.loss_bbox: 0.0017, loss: 0.0139, grad_norm: 0.1086
+2025-05-06 16:55:01,020 - mmrotate - INFO - Saving checkpoint at 25 epochs
+2025-05-06 17:02:21,008 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 218  | 0.017  | 0.005 |
+| FCBK   | 11134 | 7133 | 0.023  | 0.017 |
+| Zigzag | 9050  | 4801 | 0.035  | 0.055 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.026 |
++--------+-------+------+--------+-------+
+2025-05-06 17:02:21,429 - mmrotate - INFO - Exp name: redet_re50_refpn_1x_brickkiln_le90.py
+2025-05-06 17:02:21,430 - mmrotate - INFO - Epoch(val) [25][15590]	mAP: 0.0256

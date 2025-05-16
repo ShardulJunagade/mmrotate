@@ -1,0 +1,837 @@
+2025-05-09 00:30:22,869 - mmrotate - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.20 | packaged by conda-forge | (default, Sep 30 2024, 17:52:49) [GCC 13.3.0]
+CUDA available: True
+GPU 0: NVIDIA A100-SXM4-80GB
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 10.1, V10.1.24
+GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+PyTorch: 1.9.0+cu111
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.1.2 (Git Hash 98be7e8afa711dc9b66c8ff3504129cb82013cdb)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.1
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.1, CUDNN_VERSION=8.0.5, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.9.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.10.0+cu111
+OpenCV: 4.11.0
+MMCV: 1.7.2
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.1
+MMRotate: 0.3.4+b030f38
+------------------------------------------------------------
+
+2025-05-09 00:30:23,840 - mmrotate - INFO - Distributed training: True
+2025-05-09 00:30:25,024 - mmrotate - INFO - Config:
+dataset_type = 'BrickKilnDataset'
+data_root = '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='RResize', img_scale=(128, 128)),
+    dict(
+        type='RRandomFlip',
+        flip_ratio=[0.25, 0.25, 0.25],
+        direction=['horizontal', 'vertical', 'diagonal'],
+        version='oc'),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(128, 128),
+        flip=False,
+        transforms=[
+            dict(type='RResize'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=128,
+    workers_per_gpu=2,
+    train=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='RResize', img_scale=(128, 128)),
+            dict(
+                type='RRandomFlip',
+                flip_ratio=[0.25, 0.25, 0.25],
+                direction=['horizontal', 'vertical', 'diagonal'],
+                version='oc'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
+        version='oc'),
+    val=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='oc'),
+    test=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='oc'))
+evaluation = dict(interval=1, metric='mAP')
+optimizer = dict(type='SGD', lr=0.0025, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.3333333333333333,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=25)
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+angle_version = 'oc'
+model = dict(
+    type='R3Det',
+    backbone=dict(
+        type='ResNet',
+        depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        zero_init_residual=False,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        norm_eval=True,
+        style='pytorch',
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
+    neck=dict(
+        type='FPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        start_level=1,
+        add_extra_convs='on_input',
+        num_outs=5),
+    bbox_head=dict(
+        type='RotatedRetinaHead',
+        num_classes=3,
+        in_channels=256,
+        stacked_convs=2,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='RotatedAnchorGenerator',
+            octave_base_scale=4,
+            scales_per_octave=3,
+            ratios=[1.0, 0.5, 2.0],
+            strides=[8, 16, 32, 64, 128]),
+        bbox_coder=dict(
+            type='DeltaXYWHAOBBoxCoder',
+            angle_range='oc',
+            norm_factor=None,
+            edge_swap=False,
+            proj_xy=False,
+            target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+            target_stds=(1.0, 1.0, 1.0, 1.0, 1.0)),
+        loss_cls=dict(
+            type='FocalLoss',
+            use_sigmoid=True,
+            gamma=2.0,
+            alpha=0.25,
+            loss_weight=1.0),
+        loss_bbox=dict(type='SmoothL1Loss', beta=0.11, loss_weight=1.0)),
+    frm_cfgs=[dict(in_channels=256, featmap_strides=[8, 16, 32, 64, 128])],
+    num_refine_stages=1,
+    refine_heads=[
+        dict(
+            type='RotatedRetinaRefineHead',
+            num_classes=3,
+            in_channels=256,
+            stacked_convs=2,
+            feat_channels=256,
+            assign_by_circumhbbox=None,
+            anchor_generator=dict(
+                type='PseudoAnchorGenerator', strides=[8, 16, 32, 64, 128]),
+            bbox_coder=dict(
+                type='DeltaXYWHAOBBoxCoder',
+                angle_range='oc',
+                norm_factor=None,
+                edge_swap=False,
+                proj_xy=False,
+                target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+                target_stds=(1.0, 1.0, 1.0, 1.0, 1.0)),
+            loss_cls=dict(
+                type='FocalLoss',
+                use_sigmoid=True,
+                gamma=2.0,
+                alpha=0.25,
+                loss_weight=1.0),
+            loss_bbox=dict(type='SmoothL1Loss', beta=0.11, loss_weight=1.0))
+    ],
+    train_cfg=dict(
+        s0=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.4,
+                min_pos_iou=0,
+                ignore_iof_thr=-1,
+                iou_calculator=dict(type='RBboxOverlaps2D')),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        sr=[
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.6,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0,
+                    ignore_iof_thr=-1,
+                    iou_calculator=dict(type='RBboxOverlaps2D')),
+                allowed_border=-1,
+                pos_weight=-1,
+                debug=False)
+        ],
+        stage_loss_weights=[1.0]),
+    test_cfg=dict(
+        nms_pre=2000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        nms=dict(iou_thr=0.1),
+        max_per_img=2000))
+batch_size = 128
+num_epochs = 25
+work_dir = './work_dirs/r3det_tiny_r50_fpn_1x_brickkiln_oc'
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2025-05-09 00:30:25,025 - mmrotate - INFO - Set random seed to 0, deterministic: False
+2025-05-09 00:30:51,132 - mmrotate - INFO - Start running, host: shardul.junagade@ramanujan, work_dir: /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/r3det_tiny_r50_fpn_1x_brickkiln_oc
+2025-05-09 00:30:51,133 - mmrotate - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2025-05-09 00:30:51,133 - mmrotate - INFO - workflow: [('train', 1)], max: 25 epochs
+2025-05-09 00:30:51,133 - mmrotate - INFO - Checkpoints will be saved to /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/r3det_tiny_r50_fpn_1x_brickkiln_oc by HardDiskBackend.
+2025-05-09 00:33:46,971 - mmrotate - INFO - Epoch [1][50/366]	lr: 9.967e-04, eta: 8:53:21, time: 3.517, data_time: 0.193, memory: 3127, s0.loss_cls: 0.9409, s0.loss_bbox: 1.8930, sr0.loss_cls: 0.9288, sr0.loss_bbox: 2.0330, loss: 5.7956, grad_norm: 22.6279
+2025-05-09 00:36:34,441 - mmrotate - INFO - Epoch [1][100/366]	lr: 1.163e-03, eta: 8:37:49, time: 3.349, data_time: 0.129, memory: 3127, s0.loss_cls: 0.6308, s0.loss_bbox: 1.2453, sr0.loss_cls: 0.6895, sr0.loss_bbox: 1.4560, loss: 4.0216, grad_norm: 6.8349
+2025-05-09 00:39:27,199 - mmrotate - INFO - Epoch [1][150/366]	lr: 1.330e-03, eta: 8:36:03, time: 3.455, data_time: 0.128, memory: 3127, s0.loss_cls: 0.5515, s0.loss_bbox: 1.0855, sr0.loss_cls: 0.6191, sr0.loss_bbox: 1.2970, loss: 3.5531, grad_norm: 8.8125
+2025-05-09 00:42:22,948 - mmrotate - INFO - Epoch [1][200/366]	lr: 1.497e-03, eta: 8:35:58, time: 3.515, data_time: 0.127, memory: 3127, s0.loss_cls: 0.5084, s0.loss_bbox: 1.0240, sr0.loss_cls: 0.5806, sr0.loss_bbox: 1.1988, loss: 3.3118, grad_norm: 11.1873
+2025-05-09 00:45:20,038 - mmrotate - INFO - Epoch [1][250/366]	lr: 1.663e-03, eta: 8:35:32, time: 3.542, data_time: 0.135, memory: 3127, s0.loss_cls: 0.4754, s0.loss_bbox: 0.9892, sr0.loss_cls: 0.5654, sr0.loss_bbox: 1.1182, loss: 3.1482, grad_norm: 9.1735
+2025-05-09 00:48:10,984 - mmrotate - INFO - Epoch [1][300/366]	lr: 1.830e-03, eta: 8:31:15, time: 3.419, data_time: 0.129, memory: 3127, s0.loss_cls: 0.4458, s0.loss_bbox: 0.9686, sr0.loss_cls: 0.5408, sr0.loss_bbox: 1.0874, loss: 3.0426, grad_norm: 10.0242
+2025-05-09 00:51:08,015 - mmrotate - INFO - Epoch [1][350/366]	lr: 1.997e-03, eta: 8:29:55, time: 3.541, data_time: 0.134, memory: 3127, s0.loss_cls: 0.4187, s0.loss_bbox: 0.9443, sr0.loss_cls: 0.5289, sr0.loss_bbox: 1.0469, loss: 2.9388, grad_norm: 8.3344
+2025-05-09 00:52:00,981 - mmrotate - INFO - Saving checkpoint at 1 epochs
+2025-05-09 01:05:20,023 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 45413  | 0.279  | 0.010 |
+| FCBK   | 11134 | 662229 | 0.129  | 0.011 |
+| Zigzag | 9050  | 357626 | 0.163  | 0.017 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.013 |
++--------+-------+--------+--------+-------+
+2025-05-09 01:05:20,119 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 01:05:20,121 - mmrotate - INFO - Epoch(val) [1][15590]	mAP: 0.0125
+2025-05-09 01:07:45,007 - mmrotate - INFO - Epoch [2][50/366]	lr: 2.217e-03, eta: 7:56:30, time: 2.898, data_time: 0.203, memory: 3127, s0.loss_cls: 0.4054, s0.loss_bbox: 0.9088, sr0.loss_cls: 0.5176, sr0.loss_bbox: 0.9649, loss: 2.7967, grad_norm: 7.7588
+2025-05-09 01:10:12,496 - mmrotate - INFO - Epoch [2][100/366]	lr: 2.383e-03, eta: 7:48:45, time: 2.950, data_time: 0.127, memory: 3127, s0.loss_cls: 0.3896, s0.loss_bbox: 0.9070, sr0.loss_cls: 0.5084, sr0.loss_bbox: 0.9377, loss: 2.7427, grad_norm: 8.0255
+2025-05-09 01:12:41,714 - mmrotate - INFO - Epoch [2][150/366]	lr: 2.500e-03, eta: 7:42:30, time: 2.984, data_time: 0.137, memory: 3127, s0.loss_cls: 0.3888, s0.loss_bbox: 0.8688, sr0.loss_cls: 0.4992, sr0.loss_bbox: 0.8778, loss: 2.6345, grad_norm: 8.3064
+2025-05-09 01:15:10,473 - mmrotate - INFO - Epoch [2][200/366]	lr: 2.500e-03, eta: 7:36:48, time: 2.975, data_time: 0.135, memory: 3127, s0.loss_cls: 0.3831, s0.loss_bbox: 0.8430, sr0.loss_cls: 0.4819, sr0.loss_bbox: 0.8358, loss: 2.5437, grad_norm: 8.0183
+2025-05-09 01:17:46,387 - mmrotate - INFO - Epoch [2][250/366]	lr: 2.500e-03, eta: 7:33:17, time: 3.118, data_time: 0.129, memory: 3127, s0.loss_cls: 0.3739, s0.loss_bbox: 0.7919, sr0.loss_cls: 0.4581, sr0.loss_bbox: 0.7711, loss: 2.3950, grad_norm: 8.0827
+2025-05-09 01:20:17,962 - mmrotate - INFO - Epoch [2][300/366]	lr: 2.500e-03, eta: 7:28:58, time: 3.031, data_time: 0.139, memory: 3127, s0.loss_cls: 0.3675, s0.loss_bbox: 0.7390, sr0.loss_cls: 0.4375, sr0.loss_bbox: 0.6954, loss: 2.2393, grad_norm: 7.2812
+2025-05-09 01:23:00,795 - mmrotate - INFO - Epoch [2][350/366]	lr: 2.500e-03, eta: 7:27:07, time: 3.257, data_time: 0.151, memory: 3127, s0.loss_cls: 0.3638, s0.loss_bbox: 0.7349, sr0.loss_cls: 0.4207, sr0.loss_bbox: 0.6684, loss: 2.1878, grad_norm: 7.1120
+2025-05-09 01:23:52,544 - mmrotate - INFO - Saving checkpoint at 2 epochs
+2025-05-09 01:38:39,766 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 30031  | 0.294  | 0.020 |
+| FCBK   | 11134 | 394808 | 0.273  | 0.122 |
+| Zigzag | 9050  | 267010 | 0.313  | 0.137 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.093 |
++--------+-------+--------+--------+-------+
+2025-05-09 01:38:39,939 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 01:38:39,941 - mmrotate - INFO - Epoch(val) [2][15590]	mAP: 0.0927
+2025-05-09 01:41:49,726 - mmrotate - INFO - Epoch [3][50/366]	lr: 2.500e-03, eta: 7:20:02, time: 3.796, data_time: 0.212, memory: 3127, s0.loss_cls: 0.3614, s0.loss_bbox: 0.6981, sr0.loss_cls: 0.4127, sr0.loss_bbox: 0.6305, loss: 2.1027, grad_norm: 7.4390
+2025-05-09 01:44:46,195 - mmrotate - INFO - Epoch [3][100/366]	lr: 2.500e-03, eta: 7:20:31, time: 3.529, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3565, s0.loss_bbox: 0.6882, sr0.loss_cls: 0.4034, sr0.loss_bbox: 0.6251, loss: 2.0732, grad_norm: 7.4407
+2025-05-09 01:47:51,408 - mmrotate - INFO - Epoch [3][150/366]	lr: 2.500e-03, eta: 7:21:59, time: 3.704, data_time: 0.162, memory: 3127, s0.loss_cls: 0.3602, s0.loss_bbox: 0.6658, sr0.loss_cls: 0.4021, sr0.loss_bbox: 0.6092, loss: 2.0373, grad_norm: 7.0228
+2025-05-09 01:50:49,368 - mmrotate - INFO - Epoch [3][200/366]	lr: 2.500e-03, eta: 7:21:54, time: 3.559, data_time: 0.138, memory: 3127, s0.loss_cls: 0.3562, s0.loss_bbox: 0.6624, sr0.loss_cls: 0.3905, sr0.loss_bbox: 0.5965, loss: 2.0057, grad_norm: 6.4341
+2025-05-09 01:53:33,647 - mmrotate - INFO - Epoch [3][250/366]	lr: 2.500e-03, eta: 7:19:37, time: 3.286, data_time: 0.152, memory: 3127, s0.loss_cls: 0.3523, s0.loss_bbox: 0.6445, sr0.loss_cls: 0.3752, sr0.loss_bbox: 0.5656, loss: 1.9375, grad_norm: 6.1929
+2025-05-09 01:56:29,175 - mmrotate - INFO - Epoch [3][300/366]	lr: 2.500e-03, eta: 7:18:46, time: 3.511, data_time: 0.177, memory: 3127, s0.loss_cls: 0.3518, s0.loss_bbox: 0.6590, sr0.loss_cls: 0.3791, sr0.loss_bbox: 0.5792, loss: 1.9692, grad_norm: 6.7040
+2025-05-09 01:59:32,842 - mmrotate - INFO - Epoch [3][350/366]	lr: 2.500e-03, eta: 7:18:44, time: 3.673, data_time: 0.178, memory: 3127, s0.loss_cls: 0.3459, s0.loss_bbox: 0.6313, sr0.loss_cls: 0.3751, sr0.loss_bbox: 0.5527, loss: 1.9050, grad_norm: 6.6345
+2025-05-09 02:00:33,604 - mmrotate - INFO - Saving checkpoint at 3 epochs
+2025-05-09 02:15:00,233 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 33227  | 0.379  | 0.109 |
+| FCBK   | 11134 | 379294 | 0.356  | 0.101 |
+| Zigzag | 9050  | 297788 | 0.416  | 0.186 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.132 |
++--------+-------+--------+--------+-------+
+2025-05-09 02:15:00,332 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 02:15:00,333 - mmrotate - INFO - Epoch(val) [3][15590]	mAP: 0.1322
+2025-05-09 02:17:43,127 - mmrotate - INFO - Epoch [4][50/366]	lr: 2.500e-03, eta: 7:09:02, time: 3.256, data_time: 0.183, memory: 3127, s0.loss_cls: 0.3445, s0.loss_bbox: 0.6332, sr0.loss_cls: 0.3700, sr0.loss_bbox: 0.5506, loss: 1.8984, grad_norm: 6.6281
+2025-05-09 02:20:03,860 - mmrotate - INFO - Epoch [4][100/366]	lr: 2.500e-03, eta: 7:04:08, time: 2.815, data_time: 0.116, memory: 3127, s0.loss_cls: 0.3435, s0.loss_bbox: 0.6332, sr0.loss_cls: 0.3672, sr0.loss_bbox: 0.5562, loss: 1.9001, grad_norm: 6.3799
+2025-05-09 02:22:36,252 - mmrotate - INFO - Epoch [4][150/366]	lr: 2.500e-03, eta: 7:00:40, time: 3.048, data_time: 0.120, memory: 3127, s0.loss_cls: 0.3383, s0.loss_bbox: 0.6159, sr0.loss_cls: 0.3646, sr0.loss_bbox: 0.5450, loss: 1.8638, grad_norm: 6.3134
+2025-05-09 02:25:12,753 - mmrotate - INFO - Epoch [4][200/366]	lr: 2.500e-03, eta: 6:57:41, time: 3.130, data_time: 0.120, memory: 3127, s0.loss_cls: 0.3384, s0.loss_bbox: 0.6086, sr0.loss_cls: 0.3548, sr0.loss_bbox: 0.5277, loss: 1.8294, grad_norm: 5.6869
+2025-05-09 02:27:50,992 - mmrotate - INFO - Epoch [4][250/366]	lr: 2.500e-03, eta: 6:54:53, time: 3.165, data_time: 0.117, memory: 3127, s0.loss_cls: 0.3375, s0.loss_bbox: 0.6129, sr0.loss_cls: 0.3515, sr0.loss_bbox: 0.5365, loss: 1.8385, grad_norm: 5.7192
+2025-05-09 02:30:23,142 - mmrotate - INFO - Epoch [4][300/366]	lr: 2.500e-03, eta: 6:51:33, time: 3.043, data_time: 0.120, memory: 3127, s0.loss_cls: 0.3407, s0.loss_bbox: 0.5850, sr0.loss_cls: 0.3472, sr0.loss_bbox: 0.5124, loss: 1.7853, grad_norm: 5.3320
+2025-05-09 02:33:02,692 - mmrotate - INFO - Epoch [4][350/366]	lr: 2.500e-03, eta: 6:48:55, time: 3.191, data_time: 0.124, memory: 3127, s0.loss_cls: 0.3349, s0.loss_bbox: 0.5972, sr0.loss_cls: 0.3389, sr0.loss_bbox: 0.5055, loss: 1.7765, grad_norm: 5.4846
+2025-05-09 02:33:48,185 - mmrotate - INFO - Saving checkpoint at 4 epochs
+2025-05-09 02:46:09,380 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 35931  | 0.418  | 0.094 |
+| FCBK   | 11134 | 330175 | 0.380  | 0.170 |
+| Zigzag | 9050  | 279314 | 0.428  | 0.140 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.135 |
++--------+-------+--------+--------+-------+
+2025-05-09 02:46:09,543 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 02:46:09,545 - mmrotate - INFO - Epoch(val) [4][15590]	mAP: 0.1349
+2025-05-09 02:48:42,281 - mmrotate - INFO - Epoch [5][50/366]	lr: 2.500e-03, eta: 6:40:35, time: 3.054, data_time: 0.200, memory: 3127, s0.loss_cls: 0.3301, s0.loss_bbox: 0.5683, sr0.loss_cls: 0.3423, sr0.loss_bbox: 0.4937, loss: 1.7345, grad_norm: 5.9282
+2025-05-09 02:51:08,034 - mmrotate - INFO - Epoch [5][100/366]	lr: 2.500e-03, eta: 6:37:01, time: 2.915, data_time: 0.131, memory: 3127, s0.loss_cls: 0.3358, s0.loss_bbox: 0.6157, sr0.loss_cls: 0.3446, sr0.loss_bbox: 0.5301, loss: 1.8263, grad_norm: 6.0560
+2025-05-09 02:53:36,189 - mmrotate - INFO - Epoch [5][150/366]	lr: 2.500e-03, eta: 6:33:42, time: 2.963, data_time: 0.131, memory: 3127, s0.loss_cls: 0.3330, s0.loss_bbox: 0.5982, sr0.loss_cls: 0.3405, sr0.loss_bbox: 0.5188, loss: 1.7906, grad_norm: 5.7372
+2025-05-09 02:55:51,285 - mmrotate - INFO - Epoch [5][200/366]	lr: 2.500e-03, eta: 6:29:28, time: 2.702, data_time: 0.130, memory: 3127, s0.loss_cls: 0.3318, s0.loss_bbox: 0.5974, sr0.loss_cls: 0.3367, sr0.loss_bbox: 0.5150, loss: 1.7809, grad_norm: 5.5141
+2025-05-09 02:58:31,549 - mmrotate - INFO - Epoch [5][250/366]	lr: 2.500e-03, eta: 6:27:10, time: 3.205, data_time: 0.143, memory: 3127, s0.loss_cls: 0.3293, s0.loss_bbox: 0.5890, sr0.loss_cls: 0.3397, sr0.loss_bbox: 0.5123, loss: 1.7703, grad_norm: 5.5459
+2025-05-09 03:01:10,550 - mmrotate - INFO - Epoch [5][300/366]	lr: 2.500e-03, eta: 6:24:46, time: 3.180, data_time: 0.135, memory: 3127, s0.loss_cls: 0.3303, s0.loss_bbox: 0.5698, sr0.loss_cls: 0.3361, sr0.loss_bbox: 0.4897, loss: 1.7259, grad_norm: 5.3342
+2025-05-09 03:03:47,090 - mmrotate - INFO - Epoch [5][350/366]	lr: 2.500e-03, eta: 6:22:11, time: 3.131, data_time: 0.132, memory: 3127, s0.loss_cls: 0.3241, s0.loss_bbox: 0.5869, sr0.loss_cls: 0.3273, sr0.loss_bbox: 0.5004, loss: 1.7387, grad_norm: 5.3941
+2025-05-09 03:04:34,897 - mmrotate - INFO - Saving checkpoint at 5 epochs
+2025-05-09 03:17:22,859 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 44257  | 0.390  | 0.135 |
+| FCBK   | 11134 | 341562 | 0.371  | 0.167 |
+| Zigzag | 9050  | 206410 | 0.434  | 0.201 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.168 |
++--------+-------+--------+--------+-------+
+2025-05-09 03:17:23,042 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 03:17:23,044 - mmrotate - INFO - Epoch(val) [5][15590]	mAP: 0.1677
+2025-05-09 03:20:26,171 - mmrotate - INFO - Epoch [6][50/366]	lr: 2.500e-03, eta: 6:17:15, time: 3.662, data_time: 0.199, memory: 3127, s0.loss_cls: 0.3275, s0.loss_bbox: 0.5542, sr0.loss_cls: 0.3275, sr0.loss_bbox: 0.4852, loss: 1.6944, grad_norm: 4.9964
+2025-05-09 03:23:22,810 - mmrotate - INFO - Epoch [6][100/366]	lr: 2.500e-03, eta: 6:15:57, time: 3.533, data_time: 0.134, memory: 3127, s0.loss_cls: 0.3242, s0.loss_bbox: 0.5400, sr0.loss_cls: 0.3243, sr0.loss_bbox: 0.4772, loss: 1.6657, grad_norm: 4.8261
+2025-05-09 03:26:13,597 - mmrotate - INFO - Epoch [6][150/366]	lr: 2.500e-03, eta: 6:14:14, time: 3.416, data_time: 0.115, memory: 3127, s0.loss_cls: 0.3221, s0.loss_bbox: 0.5772, sr0.loss_cls: 0.3252, sr0.loss_bbox: 0.4969, loss: 1.7213, grad_norm: 5.3517
+2025-05-09 03:28:53,243 - mmrotate - INFO - Epoch [6][200/366]	lr: 2.500e-03, eta: 6:11:48, time: 3.193, data_time: 0.112, memory: 3127, s0.loss_cls: 0.3250, s0.loss_bbox: 0.5868, sr0.loss_cls: 0.3296, sr0.loss_bbox: 0.5164, loss: 1.7579, grad_norm: 5.5608
+2025-05-09 03:31:34,932 - mmrotate - INFO - Epoch [6][250/366]	lr: 2.500e-03, eta: 6:09:29, time: 3.234, data_time: 0.125, memory: 3127, s0.loss_cls: 0.3246, s0.loss_bbox: 0.5700, sr0.loss_cls: 0.3212, sr0.loss_bbox: 0.4972, loss: 1.7130, grad_norm: 4.9474
+2025-05-09 03:34:21,461 - mmrotate - INFO - Epoch [6][300/366]	lr: 2.500e-03, eta: 6:07:24, time: 3.331, data_time: 0.129, memory: 3127, s0.loss_cls: 0.3212, s0.loss_bbox: 0.5595, sr0.loss_cls: 0.3209, sr0.loss_bbox: 0.4846, loss: 1.6862, grad_norm: 5.1229
+2025-05-09 03:37:16,939 - mmrotate - INFO - Epoch [6][350/366]	lr: 2.500e-03, eta: 6:05:46, time: 3.510, data_time: 0.136, memory: 3127, s0.loss_cls: 0.3229, s0.loss_bbox: 0.5569, sr0.loss_cls: 0.3206, sr0.loss_bbox: 0.4930, loss: 1.6934, grad_norm: 5.1243
+2025-05-09 03:38:07,125 - mmrotate - INFO - Saving checkpoint at 6 epochs
+2025-05-09 03:50:59,710 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 40064  | 0.370  | 0.157 |
+| FCBK   | 11134 | 316298 | 0.381  | 0.127 |
+| Zigzag | 9050  | 203129 | 0.430  | 0.153 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.146 |
++--------+-------+--------+--------+-------+
+2025-05-09 03:50:59,827 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 03:50:59,828 - mmrotate - INFO - Epoch(val) [6][15590]	mAP: 0.1457
+2025-05-09 03:53:43,075 - mmrotate - INFO - Epoch [7][50/366]	lr: 2.500e-03, eta: 6:00:01, time: 3.264, data_time: 0.192, memory: 3127, s0.loss_cls: 0.3149, s0.loss_bbox: 0.5553, sr0.loss_cls: 0.3203, sr0.loss_bbox: 0.4943, loss: 1.6849, grad_norm: 5.4817
+2025-05-09 03:56:29,151 - mmrotate - INFO - Epoch [7][100/366]	lr: 2.500e-03, eta: 5:57:53, time: 3.322, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3183, s0.loss_bbox: 0.5307, sr0.loss_cls: 0.3101, sr0.loss_bbox: 0.4608, loss: 1.6199, grad_norm: 4.1018
+2025-05-09 03:59:17,681 - mmrotate - INFO - Epoch [7][150/366]	lr: 2.500e-03, eta: 5:55:51, time: 3.371, data_time: 0.128, memory: 3127, s0.loss_cls: 0.3212, s0.loss_bbox: 0.5586, sr0.loss_cls: 0.3149, sr0.loss_bbox: 0.4750, loss: 1.6698, grad_norm: 5.2254
+2025-05-09 04:02:07,732 - mmrotate - INFO - Epoch [7][200/366]	lr: 2.500e-03, eta: 5:53:51, time: 3.401, data_time: 0.135, memory: 3127, s0.loss_cls: 0.3216, s0.loss_bbox: 0.5681, sr0.loss_cls: 0.3185, sr0.loss_bbox: 0.4826, loss: 1.6908, grad_norm: 5.2804
+2025-05-09 04:04:49,874 - mmrotate - INFO - Epoch [7][250/366]	lr: 2.500e-03, eta: 5:51:28, time: 3.243, data_time: 0.142, memory: 3127, s0.loss_cls: 0.3212, s0.loss_bbox: 0.5484, sr0.loss_cls: 0.3163, sr0.loss_bbox: 0.4864, loss: 1.6724, grad_norm: 5.1207
+2025-05-09 04:07:28,312 - mmrotate - INFO - Epoch [7][300/366]	lr: 2.500e-03, eta: 5:48:54, time: 3.169, data_time: 0.112, memory: 3127, s0.loss_cls: 0.3171, s0.loss_bbox: 0.5390, sr0.loss_cls: 0.3098, sr0.loss_bbox: 0.4812, loss: 1.6471, grad_norm: 4.8056
+2025-05-09 04:10:10,359 - mmrotate - INFO - Epoch [7][350/366]	lr: 2.500e-03, eta: 5:46:29, time: 3.241, data_time: 0.141, memory: 3127, s0.loss_cls: 0.3155, s0.loss_bbox: 0.5161, sr0.loss_cls: 0.3043, sr0.loss_bbox: 0.4575, loss: 1.5935, grad_norm: 4.6695
+2025-05-09 04:11:02,517 - mmrotate - INFO - Saving checkpoint at 7 epochs
+2025-05-09 04:23:36,373 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 36804  | 0.467  | 0.251 |
+| FCBK   | 11134 | 380789 | 0.442  | 0.192 |
+| Zigzag | 9050  | 179012 | 0.503  | 0.240 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.228 |
++--------+-------+--------+--------+-------+
+2025-05-09 04:23:36,560 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 04:23:36,563 - mmrotate - INFO - Epoch(val) [7][15590]	mAP: 0.2276
+2025-05-09 04:26:35,402 - mmrotate - INFO - Epoch [8][50/366]	lr: 2.500e-03, eta: 5:41:48, time: 3.577, data_time: 0.211, memory: 3127, s0.loss_cls: 0.3145, s0.loss_bbox: 0.5335, sr0.loss_cls: 0.3033, sr0.loss_bbox: 0.4601, loss: 1.6113, grad_norm: 4.6735
+2025-05-09 04:29:36,227 - mmrotate - INFO - Epoch [8][100/366]	lr: 2.500e-03, eta: 5:40:10, time: 3.616, data_time: 0.135, memory: 3127, s0.loss_cls: 0.3154, s0.loss_bbox: 0.5202, sr0.loss_cls: 0.3069, sr0.loss_bbox: 0.4558, loss: 1.5983, grad_norm: 4.7900
+2025-05-09 04:32:29,848 - mmrotate - INFO - Epoch [8][150/366]	lr: 2.500e-03, eta: 5:38:11, time: 3.473, data_time: 0.137, memory: 3127, s0.loss_cls: 0.3148, s0.loss_bbox: 0.5142, sr0.loss_cls: 0.3060, sr0.loss_bbox: 0.4570, loss: 1.5921, grad_norm: 5.0378
+2025-05-09 04:35:23,287 - mmrotate - INFO - Epoch [8][200/366]	lr: 2.500e-03, eta: 5:36:10, time: 3.469, data_time: 0.135, memory: 3127, s0.loss_cls: 0.3097, s0.loss_bbox: 0.5212, sr0.loss_cls: 0.3024, sr0.loss_bbox: 0.4571, loss: 1.5904, grad_norm: 5.0204
+2025-05-09 04:38:05,725 - mmrotate - INFO - Epoch [8][250/366]	lr: 2.500e-03, eta: 5:33:43, time: 3.249, data_time: 0.138, memory: 3127, s0.loss_cls: 0.3148, s0.loss_bbox: 0.5269, sr0.loss_cls: 0.3047, sr0.loss_bbox: 0.4717, loss: 1.6181, grad_norm: 4.6393
+2025-05-09 04:40:44,488 - mmrotate - INFO - Epoch [8][300/366]	lr: 2.500e-03, eta: 5:31:07, time: 3.175, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3107, s0.loss_bbox: 0.5209, sr0.loss_cls: 0.3011, sr0.loss_bbox: 0.4552, loss: 1.5879, grad_norm: 4.4041
+2025-05-09 04:43:26,370 - mmrotate - INFO - Epoch [8][350/366]	lr: 2.500e-03, eta: 5:28:37, time: 3.238, data_time: 0.127, memory: 3127, s0.loss_cls: 0.3127, s0.loss_bbox: 0.5291, sr0.loss_cls: 0.3039, sr0.loss_bbox: 0.4600, loss: 1.6056, grad_norm: 5.0240
+2025-05-09 04:44:18,747 - mmrotate - INFO - Saving checkpoint at 8 epochs
+2025-05-09 04:57:20,171 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 31935  | 0.475  | 0.244 |
+| FCBK   | 11134 | 350512 | 0.440  | 0.178 |
+| Zigzag | 9050  | 191843 | 0.512  | 0.255 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.226 |
++--------+-------+--------+--------+-------+
+2025-05-09 04:57:20,294 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 04:57:20,296 - mmrotate - INFO - Epoch(val) [8][15590]	mAP: 0.2256
+2025-05-09 05:00:25,162 - mmrotate - INFO - Epoch [9][50/366]	lr: 2.500e-04, eta: 5:24:19, time: 3.697, data_time: 0.211, memory: 3127, s0.loss_cls: 0.3077, s0.loss_bbox: 0.4795, sr0.loss_cls: 0.2872, sr0.loss_bbox: 0.4288, loss: 1.5032, grad_norm: 3.3731
+2025-05-09 05:03:19,334 - mmrotate - INFO - Epoch [9][100/366]	lr: 2.500e-04, eta: 5:22:15, time: 3.483, data_time: 0.139, memory: 3127, s0.loss_cls: 0.3032, s0.loss_bbox: 0.4875, sr0.loss_cls: 0.2849, sr0.loss_bbox: 0.4338, loss: 1.5094, grad_norm: 3.5706
+2025-05-09 05:06:13,082 - mmrotate - INFO - Epoch [9][150/366]	lr: 2.500e-04, eta: 5:20:08, time: 3.475, data_time: 0.132, memory: 3127, s0.loss_cls: 0.3024, s0.loss_bbox: 0.4706, sr0.loss_cls: 0.2839, sr0.loss_bbox: 0.4109, loss: 1.4679, grad_norm: 3.4272
+2025-05-09 05:09:06,739 - mmrotate - INFO - Epoch [9][200/366]	lr: 2.500e-04, eta: 5:18:00, time: 3.473, data_time: 0.129, memory: 3127, s0.loss_cls: 0.3034, s0.loss_bbox: 0.4784, sr0.loss_cls: 0.2833, sr0.loss_bbox: 0.4245, loss: 1.4895, grad_norm: 3.6201
+2025-05-09 05:11:42,737 - mmrotate - INFO - Epoch [9][250/366]	lr: 2.500e-04, eta: 5:15:17, time: 3.120, data_time: 0.128, memory: 3127, s0.loss_cls: 0.3017, s0.loss_bbox: 0.4649, sr0.loss_cls: 0.2807, sr0.loss_bbox: 0.4160, loss: 1.4633, grad_norm: 3.5506
+2025-05-09 05:14:28,206 - mmrotate - INFO - Epoch [9][300/366]	lr: 2.500e-04, eta: 5:12:51, time: 3.309, data_time: 0.115, memory: 3127, s0.loss_cls: 0.3045, s0.loss_bbox: 0.4842, sr0.loss_cls: 0.2830, sr0.loss_bbox: 0.4227, loss: 1.4944, grad_norm: 3.6546
+2025-05-09 05:17:11,106 - mmrotate - INFO - Epoch [9][350/366]	lr: 2.500e-04, eta: 5:10:21, time: 3.258, data_time: 0.124, memory: 3127, s0.loss_cls: 0.3031, s0.loss_bbox: 0.4921, sr0.loss_cls: 0.2807, sr0.loss_bbox: 0.4224, loss: 1.4983, grad_norm: 3.6355
+2025-05-09 05:18:04,794 - mmrotate - INFO - Saving checkpoint at 9 epochs
+2025-05-09 05:31:24,334 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 28676  | 0.488  | 0.272 |
+| FCBK   | 11134 | 290340 | 0.466  | 0.200 |
+| Zigzag | 9050  | 197250 | 0.539  | 0.286 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.253 |
++--------+-------+--------+--------+-------+
+2025-05-09 05:31:24,499 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 05:31:24,501 - mmrotate - INFO - Epoch(val) [9][15590]	mAP: 0.2527
+2025-05-09 05:34:23,683 - mmrotate - INFO - Epoch [10][50/366]	lr: 2.500e-04, eta: 5:05:59, time: 3.583, data_time: 0.187, memory: 3127, s0.loss_cls: 0.3024, s0.loss_bbox: 0.4687, sr0.loss_cls: 0.2839, sr0.loss_bbox: 0.4169, loss: 1.4719, grad_norm: 3.5176
+2025-05-09 05:37:14,972 - mmrotate - INFO - Epoch [10][100/366]	lr: 2.500e-04, eta: 5:03:44, time: 3.426, data_time: 0.131, memory: 3127, s0.loss_cls: 0.3017, s0.loss_bbox: 0.4604, sr0.loss_cls: 0.2808, sr0.loss_bbox: 0.4174, loss: 1.4604, grad_norm: 3.7122
+2025-05-09 05:40:14,352 - mmrotate - INFO - Epoch [10][150/366]	lr: 2.500e-04, eta: 5:01:40, time: 3.588, data_time: 0.121, memory: 3127, s0.loss_cls: 0.3039, s0.loss_bbox: 0.4813, sr0.loss_cls: 0.2795, sr0.loss_bbox: 0.4218, loss: 1.4865, grad_norm: 3.6941
+2025-05-09 05:43:17,231 - mmrotate - INFO - Epoch [10][200/366]	lr: 2.500e-04, eta: 4:59:41, time: 3.657, data_time: 0.130, memory: 3127, s0.loss_cls: 0.3063, s0.loss_bbox: 0.4679, sr0.loss_cls: 0.2809, sr0.loss_bbox: 0.4235, loss: 1.4786, grad_norm: 3.5632
+2025-05-09 05:46:07,273 - mmrotate - INFO - Epoch [10][250/366]	lr: 2.500e-04, eta: 4:57:19, time: 3.401, data_time: 0.138, memory: 3127, s0.loss_cls: 0.3035, s0.loss_bbox: 0.4632, sr0.loss_cls: 0.2801, sr0.loss_bbox: 0.4079, loss: 1.4548, grad_norm: 3.5022
+2025-05-09 05:49:01,246 - mmrotate - INFO - Epoch [10][300/366]	lr: 2.500e-04, eta: 4:55:03, time: 3.479, data_time: 0.129, memory: 3127, s0.loss_cls: 0.2987, s0.loss_bbox: 0.4684, sr0.loss_cls: 0.2778, sr0.loss_bbox: 0.4137, loss: 1.4587, grad_norm: 3.4804
+2025-05-09 05:51:42,849 - mmrotate - INFO - Epoch [10][350/366]	lr: 2.500e-04, eta: 4:52:27, time: 3.232, data_time: 0.139, memory: 3127, s0.loss_cls: 0.2984, s0.loss_bbox: 0.4874, sr0.loss_cls: 0.2768, sr0.loss_bbox: 0.4144, loss: 1.4770, grad_norm: 3.7085
+2025-05-09 05:52:35,694 - mmrotate - INFO - Saving checkpoint at 10 epochs
+2025-05-09 06:04:53,692 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 32718  | 0.501  | 0.283 |
+| FCBK   | 11134 | 291346 | 0.477  | 0.220 |
+| Zigzag | 9050  | 181297 | 0.550  | 0.293 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.265 |
++--------+-------+--------+--------+-------+
+2025-05-09 06:04:53,856 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 06:04:53,857 - mmrotate - INFO - Epoch(val) [10][15590]	mAP: 0.2653
+2025-05-09 06:07:50,781 - mmrotate - INFO - Epoch [11][50/366]	lr: 2.500e-04, eta: 4:48:08, time: 3.538, data_time: 0.190, memory: 3127, s0.loss_cls: 0.3006, s0.loss_bbox: 0.4657, sr0.loss_cls: 0.2785, sr0.loss_bbox: 0.4150, loss: 1.4597, grad_norm: 3.8216
+2025-05-09 06:10:42,902 - mmrotate - INFO - Epoch [11][100/366]	lr: 2.500e-04, eta: 4:45:48, time: 3.442, data_time: 0.128, memory: 3127, s0.loss_cls: 0.3004, s0.loss_bbox: 0.4553, sr0.loss_cls: 0.2767, sr0.loss_bbox: 0.3975, loss: 1.4299, grad_norm: 3.3487
+2025-05-09 06:13:36,647 - mmrotate - INFO - Epoch [11][150/366]	lr: 2.500e-04, eta: 4:43:30, time: 3.475, data_time: 0.112, memory: 3127, s0.loss_cls: 0.3002, s0.loss_bbox: 0.4731, sr0.loss_cls: 0.2789, sr0.loss_bbox: 0.4212, loss: 1.4735, grad_norm: 3.7180
+2025-05-09 06:16:31,827 - mmrotate - INFO - Epoch [11][200/366]	lr: 2.500e-04, eta: 4:41:12, time: 3.504, data_time: 0.120, memory: 3127, s0.loss_cls: 0.3017, s0.loss_bbox: 0.4671, sr0.loss_cls: 0.2794, sr0.loss_bbox: 0.4365, loss: 1.4846, grad_norm: 3.7629
+2025-05-09 06:19:23,168 - mmrotate - INFO - Epoch [11][250/366]	lr: 2.500e-04, eta: 4:38:48, time: 3.427, data_time: 0.117, memory: 3127, s0.loss_cls: 0.3022, s0.loss_bbox: 0.4573, sr0.loss_cls: 0.2786, sr0.loss_bbox: 0.3998, loss: 1.4380, grad_norm: 3.6104
+2025-05-09 06:22:21,988 - mmrotate - INFO - Epoch [11][300/366]	lr: 2.500e-04, eta: 4:36:34, time: 3.576, data_time: 0.131, memory: 3127, s0.loss_cls: 0.3018, s0.loss_bbox: 0.4801, sr0.loss_cls: 0.2761, sr0.loss_bbox: 0.4194, loss: 1.4774, grad_norm: 3.4762
+2025-05-09 06:25:24,811 - mmrotate - INFO - Epoch [11][350/366]	lr: 2.500e-04, eta: 4:34:24, time: 3.656, data_time: 0.154, memory: 3127, s0.loss_cls: 0.3031, s0.loss_bbox: 0.4799, sr0.loss_cls: 0.2802, sr0.loss_bbox: 0.4130, loss: 1.4763, grad_norm: 3.6191
+2025-05-09 06:26:24,804 - mmrotate - INFO - Saving checkpoint at 11 epochs
+2025-05-09 06:41:25,745 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 27675  | 0.487  | 0.263 |
+| FCBK   | 11134 | 304835 | 0.466  | 0.230 |
+| Zigzag | 9050  | 183860 | 0.535  | 0.282 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.258 |
++--------+-------+--------+--------+-------+
+2025-05-09 06:41:25,932 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 06:41:25,933 - mmrotate - INFO - Epoch(val) [11][15590]	mAP: 0.2580
+2025-05-09 06:44:35,568 - mmrotate - INFO - Epoch [12][50/366]	lr: 2.500e-05, eta: 4:30:25, time: 3.792, data_time: 0.217, memory: 3127, s0.loss_cls: 0.2998, s0.loss_bbox: 0.4727, sr0.loss_cls: 0.2766, sr0.loss_bbox: 0.4139, loss: 1.4631, grad_norm: 3.7308
+2025-05-09 06:47:18,716 - mmrotate - INFO - Epoch [12][100/366]	lr: 2.500e-05, eta: 4:27:49, time: 3.263, data_time: 0.142, memory: 3127, s0.loss_cls: 0.3024, s0.loss_bbox: 0.4631, sr0.loss_cls: 0.2783, sr0.loss_bbox: 0.4018, loss: 1.4456, grad_norm: 3.3792
+2025-05-09 06:50:02,506 - mmrotate - INFO - Epoch [12][150/366]	lr: 2.500e-05, eta: 4:25:14, time: 3.276, data_time: 0.142, memory: 3127, s0.loss_cls: 0.2984, s0.loss_bbox: 0.4576, sr0.loss_cls: 0.2732, sr0.loss_bbox: 0.4106, loss: 1.4399, grad_norm: 3.4658
+2025-05-09 06:52:43,973 - mmrotate - INFO - Epoch [12][200/366]	lr: 2.500e-05, eta: 4:22:36, time: 3.229, data_time: 0.141, memory: 3127, s0.loss_cls: 0.2996, s0.loss_bbox: 0.4555, sr0.loss_cls: 0.2760, sr0.loss_bbox: 0.4045, loss: 1.4356, grad_norm: 3.5413
+2025-05-09 06:54:52,582 - mmrotate - INFO - Epoch [12][250/366]	lr: 2.500e-05, eta: 4:19:20, time: 2.572, data_time: 0.144, memory: 3127, s0.loss_cls: 0.3005, s0.loss_bbox: 0.4674, sr0.loss_cls: 0.2756, sr0.loss_bbox: 0.4097, loss: 1.4532, grad_norm: 3.6483
+2025-05-09 06:57:01,929 - mmrotate - INFO - Epoch [12][300/366]	lr: 2.500e-05, eta: 4:16:06, time: 2.587, data_time: 0.129, memory: 3127, s0.loss_cls: 0.3027, s0.loss_bbox: 0.4505, sr0.loss_cls: 0.2761, sr0.loss_bbox: 0.3960, loss: 1.4253, grad_norm: 3.6235
+2025-05-09 06:59:19,939 - mmrotate - INFO - Epoch [12][350/366]	lr: 2.500e-05, eta: 4:13:04, time: 2.760, data_time: 0.152, memory: 3127, s0.loss_cls: 0.3039, s0.loss_bbox: 0.4703, sr0.loss_cls: 0.2757, sr0.loss_bbox: 0.4064, loss: 1.4562, grad_norm: 3.5460
+2025-05-09 07:00:11,159 - mmrotate - INFO - Saving checkpoint at 12 epochs
+2025-05-09 07:13:41,220 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 28953  | 0.504  | 0.274 |
+| FCBK   | 11134 | 301486 | 0.475  | 0.219 |
+| Zigzag | 9050  | 189997 | 0.552  | 0.295 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.263 |
++--------+-------+--------+--------+-------+
+2025-05-09 07:13:41,462 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 07:13:41,464 - mmrotate - INFO - Epoch(val) [12][15590]	mAP: 0.2627
+2025-05-09 07:16:11,104 - mmrotate - INFO - Epoch [13][50/366]	lr: 2.500e-05, eta: 4:08:30, time: 2.992, data_time: 0.227, memory: 3127, s0.loss_cls: 0.2991, s0.loss_bbox: 0.4569, sr0.loss_cls: 0.2768, sr0.loss_bbox: 0.4087, loss: 1.4414, grad_norm: 3.5730
+2025-05-09 07:18:27,195 - mmrotate - INFO - Epoch [13][100/366]	lr: 2.500e-05, eta: 4:05:29, time: 2.722, data_time: 0.146, memory: 3127, s0.loss_cls: 0.3008, s0.loss_bbox: 0.4611, sr0.loss_cls: 0.2742, sr0.loss_bbox: 0.4215, loss: 1.4576, grad_norm: 3.4488
+2025-05-09 07:20:26,603 - mmrotate - INFO - Epoch [13][150/366]	lr: 2.500e-05, eta: 4:02:11, time: 2.388, data_time: 0.112, memory: 3127, s0.loss_cls: 0.2969, s0.loss_bbox: 0.4720, sr0.loss_cls: 0.2753, sr0.loss_bbox: 0.4246, loss: 1.4688, grad_norm: 3.5767
+2025-05-09 07:22:35,908 - mmrotate - INFO - Epoch [13][200/366]	lr: 2.500e-05, eta: 3:59:05, time: 2.586, data_time: 0.124, memory: 3127, s0.loss_cls: 0.3001, s0.loss_bbox: 0.4450, sr0.loss_cls: 0.2754, sr0.loss_bbox: 0.4029, loss: 1.4234, grad_norm: 3.5371
+2025-05-09 07:24:30,516 - mmrotate - INFO - Epoch [13][250/366]	lr: 2.500e-05, eta: 3:55:47, time: 2.292, data_time: 0.134, memory: 3127, s0.loss_cls: 0.3035, s0.loss_bbox: 0.4717, sr0.loss_cls: 0.2788, sr0.loss_bbox: 0.4057, loss: 1.4597, grad_norm: 3.5766
+2025-05-09 07:26:34,821 - mmrotate - INFO - Epoch [13][300/366]	lr: 2.500e-05, eta: 3:52:39, time: 2.486, data_time: 0.122, memory: 3127, s0.loss_cls: 0.2975, s0.loss_bbox: 0.4639, sr0.loss_cls: 0.2732, sr0.loss_bbox: 0.4141, loss: 1.4487, grad_norm: 3.4867
+2025-05-09 07:28:49,005 - mmrotate - INFO - Epoch [13][350/366]	lr: 2.500e-05, eta: 3:49:41, time: 2.684, data_time: 0.132, memory: 3127, s0.loss_cls: 0.3033, s0.loss_bbox: 0.4612, sr0.loss_cls: 0.2795, sr0.loss_bbox: 0.4143, loss: 1.4584, grad_norm: 3.6427
+2025-05-09 07:29:36,040 - mmrotate - INFO - Saving checkpoint at 13 epochs
+2025-05-09 07:41:26,714 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29638  | 0.493  | 0.266 |
+| FCBK   | 11134 | 299701 | 0.472  | 0.216 |
+| Zigzag | 9050  | 186709 | 0.546  | 0.293 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.258 |
++--------+-------+--------+--------+-------+
+2025-05-09 07:41:26,896 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 07:41:26,898 - mmrotate - INFO - Epoch(val) [13][15590]	mAP: 0.2582
+2025-05-09 07:43:38,566 - mmrotate - INFO - Epoch [14][50/366]	lr: 2.500e-05, eta: 3:45:07, time: 2.632, data_time: 0.212, memory: 3127, s0.loss_cls: 0.3009, s0.loss_bbox: 0.4480, sr0.loss_cls: 0.2761, sr0.loss_bbox: 0.4010, loss: 1.4261, grad_norm: 3.4203
+2025-05-09 07:45:45,047 - mmrotate - INFO - Epoch [14][100/366]	lr: 2.500e-05, eta: 3:42:06, time: 2.530, data_time: 0.132, memory: 3127, s0.loss_cls: 0.3010, s0.loss_bbox: 0.4636, sr0.loss_cls: 0.2764, sr0.loss_bbox: 0.3985, loss: 1.4396, grad_norm: 3.5145
+2025-05-09 07:47:52,834 - mmrotate - INFO - Epoch [14][150/366]	lr: 2.500e-05, eta: 3:39:07, time: 2.556, data_time: 0.130, memory: 3127, s0.loss_cls: 0.2990, s0.loss_bbox: 0.4591, sr0.loss_cls: 0.2756, sr0.loss_bbox: 0.4113, loss: 1.4451, grad_norm: 3.4375
+2025-05-09 07:50:01,067 - mmrotate - INFO - Epoch [14][200/366]	lr: 2.500e-05, eta: 3:36:10, time: 2.565, data_time: 0.130, memory: 3127, s0.loss_cls: 0.3019, s0.loss_bbox: 0.4538, sr0.loss_cls: 0.2758, sr0.loss_bbox: 0.4018, loss: 1.4333, grad_norm: 3.4843
+2025-05-09 07:52:07,688 - mmrotate - INFO - Epoch [14][250/366]	lr: 2.500e-05, eta: 3:33:12, time: 2.532, data_time: 0.141, memory: 3127, s0.loss_cls: 0.2980, s0.loss_bbox: 0.4514, sr0.loss_cls: 0.2743, sr0.loss_bbox: 0.4048, loss: 1.4285, grad_norm: 3.4791
+2025-05-09 07:54:09,494 - mmrotate - INFO - Epoch [14][300/366]	lr: 2.500e-05, eta: 3:30:11, time: 2.436, data_time: 0.122, memory: 3127, s0.loss_cls: 0.2988, s0.loss_bbox: 0.4554, sr0.loss_cls: 0.2754, sr0.loss_bbox: 0.4228, loss: 1.4524, grad_norm: 3.5105
+2025-05-09 07:56:03,720 - mmrotate - INFO - Epoch [14][350/366]	lr: 2.500e-05, eta: 3:27:05, time: 2.285, data_time: 0.125, memory: 3127, s0.loss_cls: 0.3006, s0.loss_bbox: 0.4773, sr0.loss_cls: 0.2756, sr0.loss_bbox: 0.4154, loss: 1.4689, grad_norm: 3.5043
+2025-05-09 07:56:37,263 - mmrotate - INFO - Saving checkpoint at 14 epochs
+2025-05-09 08:08:26,826 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29578  | 0.505  | 0.276 |
+| FCBK   | 11134 | 298318 | 0.473  | 0.235 |
+| Zigzag | 9050  | 188034 | 0.546  | 0.291 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.267 |
++--------+-------+--------+--------+-------+
+2025-05-09 08:08:26,966 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 08:08:26,967 - mmrotate - INFO - Epoch(val) [14][15590]	mAP: 0.2674
+2025-05-09 08:10:31,178 - mmrotate - INFO - Epoch [15][50/366]	lr: 2.500e-05, eta: 3:22:42, time: 2.484, data_time: 0.183, memory: 3127, s0.loss_cls: 0.2978, s0.loss_bbox: 0.4608, sr0.loss_cls: 0.2761, sr0.loss_bbox: 0.4047, loss: 1.4394, grad_norm: 3.5860
+2025-05-09 08:12:37,481 - mmrotate - INFO - Epoch [15][100/366]	lr: 2.500e-05, eta: 3:19:49, time: 2.526, data_time: 0.133, memory: 3127, s0.loss_cls: 0.2987, s0.loss_bbox: 0.4630, sr0.loss_cls: 0.2764, sr0.loss_bbox: 0.4139, loss: 1.4520, grad_norm: 3.3443
+2025-05-09 08:14:50,555 - mmrotate - INFO - Epoch [15][150/366]	lr: 2.500e-05, eta: 3:17:02, time: 2.661, data_time: 0.140, memory: 3127, s0.loss_cls: 0.2999, s0.loss_bbox: 0.4584, sr0.loss_cls: 0.2735, sr0.loss_bbox: 0.4060, loss: 1.4378, grad_norm: 3.5107
+2025-05-09 08:17:00,942 - mmrotate - INFO - Epoch [15][200/366]	lr: 2.500e-05, eta: 3:14:13, time: 2.608, data_time: 0.127, memory: 3127, s0.loss_cls: 0.2980, s0.loss_bbox: 0.4504, sr0.loss_cls: 0.2766, sr0.loss_bbox: 0.4032, loss: 1.4282, grad_norm: 3.7681
+2025-05-09 08:19:11,843 - mmrotate - INFO - Epoch [15][250/366]	lr: 2.500e-05, eta: 3:11:26, time: 2.618, data_time: 0.126, memory: 3127, s0.loss_cls: 0.2974, s0.loss_bbox: 0.4627, sr0.loss_cls: 0.2761, sr0.loss_bbox: 0.4110, loss: 1.4473, grad_norm: 3.5632
+2025-05-09 08:21:20,760 - mmrotate - INFO - Epoch [15][300/366]	lr: 2.500e-05, eta: 3:08:38, time: 2.578, data_time: 0.126, memory: 3127, s0.loss_cls: 0.3035, s0.loss_bbox: 0.4763, sr0.loss_cls: 0.2748, sr0.loss_bbox: 0.4130, loss: 1.4677, grad_norm: 3.5358
+2025-05-09 08:23:27,457 - mmrotate - INFO - Epoch [15][350/366]	lr: 2.500e-05, eta: 3:05:49, time: 2.534, data_time: 0.124, memory: 3127, s0.loss_cls: 0.3007, s0.loss_bbox: 0.4722, sr0.loss_cls: 0.2812, sr0.loss_bbox: 0.4228, loss: 1.4770, grad_norm: 3.7155
+2025-05-09 08:24:09,015 - mmrotate - INFO - Saving checkpoint at 15 epochs
+2025-05-09 08:36:51,518 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 30534  | 0.508  | 0.281 |
+| FCBK   | 11134 | 299391 | 0.472  | 0.236 |
+| Zigzag | 9050  | 186297 | 0.552  | 0.295 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.271 |
++--------+-------+--------+--------+-------+
+2025-05-09 08:36:51,676 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 08:36:51,677 - mmrotate - INFO - Epoch(val) [15][15590]	mAP: 0.2709
+2025-05-09 08:39:04,930 - mmrotate - INFO - Epoch [16][50/366]	lr: 2.500e-05, eta: 3:01:45, time: 2.664, data_time: 0.192, memory: 3127, s0.loss_cls: 0.2973, s0.loss_bbox: 0.4523, sr0.loss_cls: 0.2740, sr0.loss_bbox: 0.4180, loss: 1.4416, grad_norm: 3.5127
+2025-05-09 08:41:13,278 - mmrotate - INFO - Epoch [16][100/366]	lr: 2.500e-05, eta: 2:59:00, time: 2.567, data_time: 0.120, memory: 3127, s0.loss_cls: 0.2972, s0.loss_bbox: 0.4538, sr0.loss_cls: 0.2760, sr0.loss_bbox: 0.3986, loss: 1.4256, grad_norm: 3.5517
+2025-05-09 08:43:22,969 - mmrotate - INFO - Epoch [16][150/366]	lr: 2.500e-05, eta: 2:56:16, time: 2.594, data_time: 0.121, memory: 3127, s0.loss_cls: 0.3029, s0.loss_bbox: 0.4585, sr0.loss_cls: 0.2754, sr0.loss_bbox: 0.4018, loss: 1.4385, grad_norm: 3.4229
+2025-05-09 08:45:31,959 - mmrotate - INFO - Epoch [16][200/366]	lr: 2.500e-05, eta: 2:53:32, time: 2.580, data_time: 0.120, memory: 3127, s0.loss_cls: 0.2999, s0.loss_bbox: 0.4621, sr0.loss_cls: 0.2785, sr0.loss_bbox: 0.4152, loss: 1.4557, grad_norm: 3.4278
+2025-05-09 08:47:36,210 - mmrotate - INFO - Epoch [16][250/366]	lr: 2.500e-05, eta: 2:50:46, time: 2.485, data_time: 0.121, memory: 3127, s0.loss_cls: 0.3022, s0.loss_bbox: 0.4662, sr0.loss_cls: 0.2762, sr0.loss_bbox: 0.4097, loss: 1.4542, grad_norm: 3.4093
+2025-05-09 08:49:39,994 - mmrotate - INFO - Epoch [16][300/366]	lr: 2.500e-05, eta: 2:48:00, time: 2.476, data_time: 0.131, memory: 3127, s0.loss_cls: 0.2995, s0.loss_bbox: 0.4620, sr0.loss_cls: 0.2741, sr0.loss_bbox: 0.4065, loss: 1.4421, grad_norm: 3.6124
+2025-05-09 08:51:52,918 - mmrotate - INFO - Epoch [16][350/366]	lr: 2.500e-05, eta: 2:45:21, time: 2.659, data_time: 0.123, memory: 3127, s0.loss_cls: 0.3000, s0.loss_bbox: 0.4749, sr0.loss_cls: 0.2768, sr0.loss_bbox: 0.4163, loss: 1.4681, grad_norm: 3.4654
+2025-05-09 08:52:37,703 - mmrotate - INFO - Saving checkpoint at 16 epochs
+2025-05-09 09:05:28,142 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29782  | 0.502  | 0.272 |
+| FCBK   | 11134 | 298909 | 0.472  | 0.236 |
+| Zigzag | 9050  | 188895 | 0.548  | 0.293 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.267 |
++--------+-------+--------+--------+-------+
+2025-05-09 09:05:28,270 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 09:05:28,271 - mmrotate - INFO - Epoch(val) [16][15590]	mAP: 0.2673
+2025-05-09 09:07:47,168 - mmrotate - INFO - Epoch [17][50/366]	lr: 2.500e-05, eta: 2:41:31, time: 2.778, data_time: 0.196, memory: 3127, s0.loss_cls: 0.3035, s0.loss_bbox: 0.4684, sr0.loss_cls: 0.2793, sr0.loss_bbox: 0.4158, loss: 1.4670, grad_norm: 3.4318
+2025-05-09 09:10:00,949 - mmrotate - INFO - Epoch [17][100/366]	lr: 2.500e-05, eta: 2:38:53, time: 2.676, data_time: 0.124, memory: 3127, s0.loss_cls: 0.2990, s0.loss_bbox: 0.4495, sr0.loss_cls: 0.2763, sr0.loss_bbox: 0.4082, loss: 1.4330, grad_norm: 3.4190
+2025-05-09 09:12:16,446 - mmrotate - INFO - Epoch [17][150/366]	lr: 2.500e-05, eta: 2:36:16, time: 2.710, data_time: 0.142, memory: 3127, s0.loss_cls: 0.2988, s0.loss_bbox: 0.4642, sr0.loss_cls: 0.2735, sr0.loss_bbox: 0.4171, loss: 1.4536, grad_norm: 3.5529
+2025-05-09 09:14:30,032 - mmrotate - INFO - Epoch [17][200/366]	lr: 2.500e-05, eta: 2:33:39, time: 2.672, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3003, s0.loss_bbox: 0.4616, sr0.loss_cls: 0.2773, sr0.loss_bbox: 0.4105, loss: 1.4496, grad_norm: 3.7569
+2025-05-09 09:16:41,028 - mmrotate - INFO - Epoch [17][250/366]	lr: 2.500e-05, eta: 2:31:01, time: 2.620, data_time: 0.134, memory: 3127, s0.loss_cls: 0.2984, s0.loss_bbox: 0.4500, sr0.loss_cls: 0.2750, sr0.loss_bbox: 0.3988, loss: 1.4223, grad_norm: 3.3973
+2025-05-09 09:18:48,785 - mmrotate - INFO - Epoch [17][300/366]	lr: 2.500e-05, eta: 2:28:22, time: 2.555, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3020, s0.loss_bbox: 0.4690, sr0.loss_cls: 0.2754, sr0.loss_bbox: 0.4171, loss: 1.4634, grad_norm: 3.4524
+2025-05-09 09:20:59,615 - mmrotate - INFO - Epoch [17][350/366]	lr: 2.500e-05, eta: 2:25:45, time: 2.617, data_time: 0.127, memory: 3127, s0.loss_cls: 0.3020, s0.loss_bbox: 0.4763, sr0.loss_cls: 0.2768, sr0.loss_bbox: 0.4199, loss: 1.4749, grad_norm: 3.7850
+2025-05-09 09:21:41,995 - mmrotate - INFO - Saving checkpoint at 17 epochs
+2025-05-09 09:33:46,842 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 28197  | 0.507  | 0.278 |
+| FCBK   | 11134 | 302936 | 0.470  | 0.235 |
+| Zigzag | 9050  | 186762 | 0.548  | 0.293 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.269 |
++--------+-------+--------+--------+-------+
+2025-05-09 09:33:46,980 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 09:33:46,981 - mmrotate - INFO - Epoch(val) [17][15590]	mAP: 0.2688
+2025-05-09 09:35:57,339 - mmrotate - INFO - Epoch [18][50/366]	lr: 2.500e-05, eta: 2:21:59, time: 2.607, data_time: 0.184, memory: 3127, s0.loss_cls: 0.2989, s0.loss_bbox: 0.4595, sr0.loss_cls: 0.2751, sr0.loss_bbox: 0.4054, loss: 1.4389, grad_norm: 3.4412
+2025-05-09 09:38:11,435 - mmrotate - INFO - Epoch [18][100/366]	lr: 2.500e-05, eta: 2:19:25, time: 2.682, data_time: 0.138, memory: 3127, s0.loss_cls: 0.2966, s0.loss_bbox: 0.4545, sr0.loss_cls: 0.2744, sr0.loss_bbox: 0.4064, loss: 1.4320, grad_norm: 3.3026
+2025-05-09 09:40:21,948 - mmrotate - INFO - Epoch [18][150/366]	lr: 2.500e-05, eta: 2:16:49, time: 2.610, data_time: 0.133, memory: 3127, s0.loss_cls: 0.2974, s0.loss_bbox: 0.4560, sr0.loss_cls: 0.2743, sr0.loss_bbox: 0.4017, loss: 1.4295, grad_norm: 3.5672
+2025-05-09 09:42:29,253 - mmrotate - INFO - Epoch [18][200/366]	lr: 2.500e-05, eta: 2:14:13, time: 2.546, data_time: 0.121, memory: 3127, s0.loss_cls: 0.2988, s0.loss_bbox: 0.4617, sr0.loss_cls: 0.2742, sr0.loss_bbox: 0.4090, loss: 1.4436, grad_norm: 3.4908
+2025-05-09 09:44:38,380 - mmrotate - INFO - Epoch [18][250/366]	lr: 2.500e-05, eta: 2:11:37, time: 2.583, data_time: 0.127, memory: 3127, s0.loss_cls: 0.3037, s0.loss_bbox: 0.4600, sr0.loss_cls: 0.2788, sr0.loss_bbox: 0.4152, loss: 1.4577, grad_norm: 3.7012
+2025-05-09 09:46:54,031 - mmrotate - INFO - Epoch [18][300/366]	lr: 2.500e-05, eta: 2:09:05, time: 2.713, data_time: 0.125, memory: 3127, s0.loss_cls: 0.3041, s0.loss_bbox: 0.4582, sr0.loss_cls: 0.2779, sr0.loss_bbox: 0.4057, loss: 1.4459, grad_norm: 3.6241
+2025-05-09 09:49:07,522 - mmrotate - INFO - Epoch [18][350/366]	lr: 2.500e-05, eta: 2:06:32, time: 2.670, data_time: 0.123, memory: 3127, s0.loss_cls: 0.3015, s0.loss_bbox: 0.4546, sr0.loss_cls: 0.2792, sr0.loss_bbox: 0.3972, loss: 1.4325, grad_norm: 3.7207
+2025-05-09 09:49:48,635 - mmrotate - INFO - Saving checkpoint at 18 epochs
+2025-05-09 10:02:22,828 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 28996  | 0.501  | 0.276 |
+| FCBK   | 11134 | 298842 | 0.474  | 0.237 |
+| Zigzag | 9050  | 187557 | 0.548  | 0.293 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.268 |
++--------+-------+--------+--------+-------+
+2025-05-09 10:02:23,013 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 10:02:23,014 - mmrotate - INFO - Epoch(val) [18][15590]	mAP: 0.2684
+2025-05-09 10:04:45,798 - mmrotate - INFO - Epoch [19][50/366]	lr: 2.500e-05, eta: 2:02:58, time: 2.855, data_time: 0.197, memory: 3127, s0.loss_cls: 0.2997, s0.loss_bbox: 0.4595, sr0.loss_cls: 0.2732, sr0.loss_bbox: 0.4103, loss: 1.4428, grad_norm: 3.5065
+2025-05-09 10:07:12,158 - mmrotate - INFO - Epoch [19][100/366]	lr: 2.500e-05, eta: 2:00:31, time: 2.927, data_time: 0.123, memory: 3127, s0.loss_cls: 0.3013, s0.loss_bbox: 0.4651, sr0.loss_cls: 0.2734, sr0.loss_bbox: 0.4087, loss: 1.4486, grad_norm: 3.4643
+2025-05-09 10:09:27,739 - mmrotate - INFO - Epoch [19][150/366]	lr: 2.500e-05, eta: 1:58:01, time: 2.712, data_time: 0.120, memory: 3127, s0.loss_cls: 0.3004, s0.loss_bbox: 0.4519, sr0.loss_cls: 0.2783, sr0.loss_bbox: 0.4054, loss: 1.4360, grad_norm: 3.7588
+2025-05-09 10:11:46,828 - mmrotate - INFO - Epoch [19][200/366]	lr: 2.500e-05, eta: 1:55:31, time: 2.782, data_time: 0.130, memory: 3127, s0.loss_cls: 0.2997, s0.loss_bbox: 0.4676, sr0.loss_cls: 0.2749, sr0.loss_bbox: 0.4141, loss: 1.4563, grad_norm: 3.5274
+2025-05-09 10:14:05,037 - mmrotate - INFO - Epoch [19][250/366]	lr: 2.500e-05, eta: 1:53:01, time: 2.764, data_time: 0.118, memory: 3127, s0.loss_cls: 0.3016, s0.loss_bbox: 0.4643, sr0.loss_cls: 0.2757, sr0.loss_bbox: 0.4032, loss: 1.4448, grad_norm: 3.5735
+2025-05-09 10:16:18,551 - mmrotate - INFO - Epoch [19][300/366]	lr: 2.500e-05, eta: 1:50:30, time: 2.670, data_time: 0.113, memory: 3127, s0.loss_cls: 0.3008, s0.loss_bbox: 0.4738, sr0.loss_cls: 0.2788, sr0.loss_bbox: 0.4173, loss: 1.4708, grad_norm: 3.6012
+2025-05-09 10:18:33,710 - mmrotate - INFO - Epoch [19][350/366]	lr: 2.500e-05, eta: 1:48:00, time: 2.703, data_time: 0.115, memory: 3127, s0.loss_cls: 0.2950, s0.loss_bbox: 0.4379, sr0.loss_cls: 0.2742, sr0.loss_bbox: 0.4018, loss: 1.4090, grad_norm: 3.3332
+2025-05-09 10:19:21,968 - mmrotate - INFO - Saving checkpoint at 19 epochs
+2025-05-09 10:32:06,455 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29165  | 0.504  | 0.277 |
+| FCBK   | 11134 | 300518 | 0.475  | 0.237 |
+| Zigzag | 9050  | 186062 | 0.553  | 0.297 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.270 |
++--------+-------+--------+--------+-------+
+2025-05-09 10:32:06,595 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 10:32:06,596 - mmrotate - INFO - Epoch(val) [19][15590]	mAP: 0.2704
+2025-05-09 10:34:10,887 - mmrotate - INFO - Epoch [20][50/366]	lr: 2.500e-05, eta: 1:44:26, time: 2.485, data_time: 0.191, memory: 3127, s0.loss_cls: 0.2967, s0.loss_bbox: 0.4571, sr0.loss_cls: 0.2747, sr0.loss_bbox: 0.3958, loss: 1.4244, grad_norm: 3.4892
+2025-05-09 10:36:16,604 - mmrotate - INFO - Epoch [20][100/366]	lr: 2.500e-05, eta: 1:41:54, time: 2.514, data_time: 0.129, memory: 3127, s0.loss_cls: 0.3000, s0.loss_bbox: 0.4589, sr0.loss_cls: 0.2724, sr0.loss_bbox: 0.4070, loss: 1.4383, grad_norm: 3.7164
+2025-05-09 10:38:29,258 - mmrotate - INFO - Epoch [20][150/366]	lr: 2.500e-05, eta: 1:39:24, time: 2.653, data_time: 0.127, memory: 3127, s0.loss_cls: 0.3006, s0.loss_bbox: 0.4535, sr0.loss_cls: 0.2742, sr0.loss_bbox: 0.3988, loss: 1.4271, grad_norm: 3.7049
+2025-05-09 10:40:43,687 - mmrotate - INFO - Epoch [20][200/366]	lr: 2.500e-05, eta: 1:36:55, time: 2.689, data_time: 0.132, memory: 3127, s0.loss_cls: 0.2997, s0.loss_bbox: 0.4621, sr0.loss_cls: 0.2758, sr0.loss_bbox: 0.4003, loss: 1.4380, grad_norm: 3.4972
+2025-05-09 10:42:52,082 - mmrotate - INFO - Epoch [20][250/366]	lr: 2.500e-05, eta: 1:34:25, time: 2.568, data_time: 0.136, memory: 3127, s0.loss_cls: 0.3009, s0.loss_bbox: 0.4729, sr0.loss_cls: 0.2768, sr0.loss_bbox: 0.4151, loss: 1.4657, grad_norm: 3.5745
+2025-05-09 10:45:05,293 - mmrotate - INFO - Epoch [20][300/366]	lr: 2.500e-05, eta: 1:31:56, time: 2.664, data_time: 0.132, memory: 3127, s0.loss_cls: 0.2982, s0.loss_bbox: 0.4656, sr0.loss_cls: 0.2765, sr0.loss_bbox: 0.4116, loss: 1.4518, grad_norm: 3.6164
+2025-05-09 10:47:20,684 - mmrotate - INFO - Epoch [20][350/366]	lr: 2.500e-05, eta: 1:29:28, time: 2.708, data_time: 0.132, memory: 3127, s0.loss_cls: 0.3021, s0.loss_bbox: 0.4881, sr0.loss_cls: 0.2753, sr0.loss_bbox: 0.4203, loss: 1.4858, grad_norm: 3.5052
+2025-05-09 10:48:02,769 - mmrotate - INFO - Saving checkpoint at 20 epochs
+2025-05-09 11:00:28,331 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29492  | 0.512  | 0.286 |
+| FCBK   | 11134 | 299686 | 0.474  | 0.235 |
+| Zigzag | 9050  | 190325 | 0.554  | 0.297 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.273 |
++--------+-------+--------+--------+-------+
+2025-05-09 11:00:28,472 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 11:00:28,474 - mmrotate - INFO - Epoch(val) [20][15590]	mAP: 0.2730
+2025-05-09 11:02:39,796 - mmrotate - INFO - Epoch [21][50/366]	lr: 2.500e-05, eta: 1:26:01, time: 2.626, data_time: 0.182, memory: 3127, s0.loss_cls: 0.3007, s0.loss_bbox: 0.4539, sr0.loss_cls: 0.2745, sr0.loss_bbox: 0.4037, loss: 1.4328, grad_norm: 3.5406
+2025-05-09 11:04:43,962 - mmrotate - INFO - Epoch [21][100/366]	lr: 2.500e-05, eta: 1:23:32, time: 2.483, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3018, s0.loss_bbox: 0.4571, sr0.loss_cls: 0.2774, sr0.loss_bbox: 0.4152, loss: 1.4514, grad_norm: 3.5486
+2025-05-09 11:06:50,626 - mmrotate - INFO - Epoch [21][150/366]	lr: 2.500e-05, eta: 1:21:03, time: 2.533, data_time: 0.126, memory: 3127, s0.loss_cls: 0.3005, s0.loss_bbox: 0.4582, sr0.loss_cls: 0.2744, sr0.loss_bbox: 0.4031, loss: 1.4362, grad_norm: 3.5099
+2025-05-09 11:08:58,170 - mmrotate - INFO - Epoch [21][200/366]	lr: 2.500e-05, eta: 1:18:34, time: 2.551, data_time: 0.126, memory: 3127, s0.loss_cls: 0.3011, s0.loss_bbox: 0.4632, sr0.loss_cls: 0.2756, sr0.loss_bbox: 0.4100, loss: 1.4499, grad_norm: 3.7035
+2025-05-09 11:11:09,309 - mmrotate - INFO - Epoch [21][250/366]	lr: 2.500e-05, eta: 1:16:07, time: 2.623, data_time: 0.121, memory: 3127, s0.loss_cls: 0.3003, s0.loss_bbox: 0.4702, sr0.loss_cls: 0.2776, sr0.loss_bbox: 0.4301, loss: 1.4782, grad_norm: 3.6160
+2025-05-09 11:13:17,244 - mmrotate - INFO - Epoch [21][300/366]	lr: 2.500e-05, eta: 1:13:39, time: 2.559, data_time: 0.128, memory: 3127, s0.loss_cls: 0.2954, s0.loss_bbox: 0.4576, sr0.loss_cls: 0.2708, sr0.loss_bbox: 0.3964, loss: 1.4202, grad_norm: 3.7002
+2025-05-09 11:15:26,628 - mmrotate - INFO - Epoch [21][350/366]	lr: 2.500e-05, eta: 1:11:11, time: 2.588, data_time: 0.112, memory: 3127, s0.loss_cls: 0.3019, s0.loss_bbox: 0.4632, sr0.loss_cls: 0.2791, sr0.loss_bbox: 0.4077, loss: 1.4518, grad_norm: 3.7104
+2025-05-09 11:16:06,924 - mmrotate - INFO - Saving checkpoint at 21 epochs
+2025-05-09 11:28:19,005 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29919  | 0.505  | 0.282 |
+| FCBK   | 11134 | 297295 | 0.475  | 0.219 |
+| Zigzag | 9050  | 188547 | 0.558  | 0.300 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.267 |
++--------+-------+--------+--------+-------+
+2025-05-09 11:28:19,144 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 11:28:19,151 - mmrotate - INFO - Epoch(val) [21][15590]	mAP: 0.2670
+2025-05-09 11:30:34,644 - mmrotate - INFO - Epoch [22][50/366]	lr: 2.500e-05, eta: 1:07:51, time: 2.710, data_time: 0.191, memory: 3127, s0.loss_cls: 0.2987, s0.loss_bbox: 0.4630, sr0.loss_cls: 0.2785, sr0.loss_bbox: 0.4071, loss: 1.4472, grad_norm: 3.6291
+2025-05-09 11:32:51,815 - mmrotate - INFO - Epoch [22][100/366]	lr: 2.500e-05, eta: 1:05:26, time: 2.743, data_time: 0.133, memory: 3127, s0.loss_cls: 0.3021, s0.loss_bbox: 0.4631, sr0.loss_cls: 0.2742, sr0.loss_bbox: 0.4093, loss: 1.4488, grad_norm: 3.7216
+2025-05-09 11:34:52,964 - mmrotate - INFO - Epoch [22][150/366]	lr: 2.500e-05, eta: 1:02:58, time: 2.423, data_time: 0.149, memory: 3127, s0.loss_cls: 0.2969, s0.loss_bbox: 0.4485, sr0.loss_cls: 0.2729, sr0.loss_bbox: 0.3931, loss: 1.4114, grad_norm: 3.5326
+2025-05-09 11:37:06,847 - mmrotate - INFO - Epoch [22][200/366]	lr: 2.500e-05, eta: 1:00:33, time: 2.678, data_time: 0.146, memory: 3127, s0.loss_cls: 0.2984, s0.loss_bbox: 0.4704, sr0.loss_cls: 0.2758, sr0.loss_bbox: 0.4210, loss: 1.4656, grad_norm: 3.5079
+2025-05-09 11:39:20,135 - mmrotate - INFO - Epoch [22][250/366]	lr: 2.500e-05, eta: 0:58:07, time: 2.666, data_time: 0.135, memory: 3127, s0.loss_cls: 0.2990, s0.loss_bbox: 0.4549, sr0.loss_cls: 0.2768, sr0.loss_bbox: 0.4103, loss: 1.4410, grad_norm: 3.4377
+2025-05-09 11:41:33,700 - mmrotate - INFO - Epoch [22][300/366]	lr: 2.500e-05, eta: 0:55:42, time: 2.671, data_time: 0.131, memory: 3127, s0.loss_cls: 0.2993, s0.loss_bbox: 0.4606, sr0.loss_cls: 0.2735, sr0.loss_bbox: 0.4061, loss: 1.4395, grad_norm: 3.7258
+2025-05-09 11:43:44,213 - mmrotate - INFO - Epoch [22][350/366]	lr: 2.500e-05, eta: 0:53:17, time: 2.610, data_time: 0.144, memory: 3127, s0.loss_cls: 0.3013, s0.loss_bbox: 0.4622, sr0.loss_cls: 0.2773, sr0.loss_bbox: 0.4109, loss: 1.4517, grad_norm: 3.4633
+2025-05-09 11:44:23,961 - mmrotate - INFO - Saving checkpoint at 22 epochs
+2025-05-09 11:57:20,524 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29651  | 0.502  | 0.275 |
+| FCBK   | 11134 | 295909 | 0.473  | 0.236 |
+| Zigzag | 9050  | 188998 | 0.550  | 0.294 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.269 |
++--------+-------+--------+--------+-------+
+2025-05-09 11:57:20,684 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 11:57:20,686 - mmrotate - INFO - Epoch(val) [22][15590]	mAP: 0.2686
+2025-05-09 11:59:39,188 - mmrotate - INFO - Epoch [23][50/366]	lr: 2.500e-05, eta: 0:50:01, time: 2.770, data_time: 0.202, memory: 3127, s0.loss_cls: 0.2995, s0.loss_bbox: 0.4768, sr0.loss_cls: 0.2746, sr0.loss_bbox: 0.4145, loss: 1.4654, grad_norm: 3.6759
+2025-05-09 12:01:54,541 - mmrotate - INFO - Epoch [23][100/366]	lr: 2.500e-05, eta: 0:47:37, time: 2.707, data_time: 0.130, memory: 3127, s0.loss_cls: 0.2982, s0.loss_bbox: 0.4611, sr0.loss_cls: 0.2765, sr0.loss_bbox: 0.4109, loss: 1.4466, grad_norm: 3.3770
+2025-05-09 12:04:01,814 - mmrotate - INFO - Epoch [23][150/366]	lr: 2.500e-05, eta: 0:45:12, time: 2.545, data_time: 0.128, memory: 3127, s0.loss_cls: 0.2972, s0.loss_bbox: 0.4522, sr0.loss_cls: 0.2705, sr0.loss_bbox: 0.4053, loss: 1.4252, grad_norm: 3.5404
+2025-05-09 12:06:08,522 - mmrotate - INFO - Epoch [23][200/366]	lr: 2.500e-05, eta: 0:42:47, time: 2.534, data_time: 0.120, memory: 3127, s0.loss_cls: 0.2982, s0.loss_bbox: 0.4427, sr0.loss_cls: 0.2748, sr0.loss_bbox: 0.3952, loss: 1.4109, grad_norm: 3.4300
+2025-05-09 12:08:00,166 - mmrotate - INFO - Epoch [23][250/366]	lr: 2.500e-05, eta: 0:40:21, time: 2.233, data_time: 0.112, memory: 3127, s0.loss_cls: 0.3013, s0.loss_bbox: 0.4577, sr0.loss_cls: 0.2757, sr0.loss_bbox: 0.4115, loss: 1.4461, grad_norm: 3.5541
+2025-05-09 12:10:11,239 - mmrotate - INFO - Epoch [23][300/366]	lr: 2.500e-05, eta: 0:37:57, time: 2.621, data_time: 0.127, memory: 3127, s0.loss_cls: 0.2978, s0.loss_bbox: 0.4647, sr0.loss_cls: 0.2746, sr0.loss_bbox: 0.4036, loss: 1.4407, grad_norm: 3.4467
+2025-05-09 12:12:25,441 - mmrotate - INFO - Epoch [23][350/366]	lr: 2.500e-05, eta: 0:35:33, time: 2.684, data_time: 0.129, memory: 3127, s0.loss_cls: 0.3004, s0.loss_bbox: 0.4638, sr0.loss_cls: 0.2755, sr0.loss_bbox: 0.4164, loss: 1.4561, grad_norm: 3.6365
+2025-05-09 12:13:10,006 - mmrotate - INFO - Saving checkpoint at 23 epochs
+2025-05-09 12:24:04,237 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 29686  | 0.505  | 0.287 |
+| FCBK   | 11134 | 296273 | 0.475  | 0.238 |
+| Zigzag | 9050  | 185428 | 0.553  | 0.297 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.274 |
++--------+-------+--------+--------+-------+
+2025-05-09 12:24:04,423 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 12:24:04,425 - mmrotate - INFO - Epoch(val) [23][15590]	mAP: 0.2738
+2025-05-09 12:26:18,655 - mmrotate - INFO - Epoch [24][50/366]	lr: 2.500e-05, eta: 0:32:21, time: 2.684, data_time: 0.205, memory: 3127, s0.loss_cls: 0.3030, s0.loss_bbox: 0.4615, sr0.loss_cls: 0.2760, sr0.loss_bbox: 0.4153, loss: 1.4559, grad_norm: 3.5215
+2025-05-09 12:28:40,799 - mmrotate - INFO - Epoch [24][100/366]	lr: 2.500e-05, eta: 0:29:58, time: 2.843, data_time: 0.146, memory: 3127, s0.loss_cls: 0.3000, s0.loss_bbox: 0.4587, sr0.loss_cls: 0.2765, sr0.loss_bbox: 0.4183, loss: 1.4534, grad_norm: 3.5492
+2025-05-09 12:30:58,094 - mmrotate - INFO - Epoch [24][150/366]	lr: 2.500e-05, eta: 0:27:36, time: 2.746, data_time: 0.130, memory: 3127, s0.loss_cls: 0.2991, s0.loss_bbox: 0.4709, sr0.loss_cls: 0.2733, sr0.loss_bbox: 0.4147, loss: 1.4581, grad_norm: 3.4973
+2025-05-09 12:32:59,963 - mmrotate - INFO - Epoch [24][200/366]	lr: 2.500e-05, eta: 0:25:12, time: 2.437, data_time: 0.109, memory: 3127, s0.loss_cls: 0.2972, s0.loss_bbox: 0.4643, sr0.loss_cls: 0.2759, sr0.loss_bbox: 0.4052, loss: 1.4425, grad_norm: 3.4331
+2025-05-09 12:35:40,031 - mmrotate - INFO - Epoch [24][250/366]	lr: 2.500e-05, eta: 0:22:51, time: 3.201, data_time: 0.119, memory: 3127, s0.loss_cls: 0.2989, s0.loss_bbox: 0.4629, sr0.loss_cls: 0.2753, sr0.loss_bbox: 0.4122, loss: 1.4494, grad_norm: 3.6656
+2025-05-09 12:38:24,191 - mmrotate - INFO - Epoch [24][300/366]	lr: 2.500e-05, eta: 0:20:30, time: 3.283, data_time: 0.119, memory: 3127, s0.loss_cls: 0.2963, s0.loss_bbox: 0.4598, sr0.loss_cls: 0.2755, sr0.loss_bbox: 0.4070, loss: 1.4387, grad_norm: 3.7001
+2025-05-09 12:41:21,219 - mmrotate - INFO - Epoch [24][350/366]	lr: 2.500e-05, eta: 0:18:09, time: 3.541, data_time: 0.128, memory: 3127, s0.loss_cls: 0.2988, s0.loss_bbox: 0.4524, sr0.loss_cls: 0.2730, sr0.loss_bbox: 0.4100, loss: 1.4342, grad_norm: 3.6516
+2025-05-09 12:42:22,934 - mmrotate - INFO - Saving checkpoint at 24 epochs
+2025-05-09 12:54:07,695 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 30520  | 0.508  | 0.281 |
+| FCBK   | 11134 | 299106 | 0.474  | 0.237 |
+| Zigzag | 9050  | 183714 | 0.549  | 0.293 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.270 |
++--------+-------+--------+--------+-------+
+2025-05-09 12:54:07,785 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 12:54:07,787 - mmrotate - INFO - Epoch(val) [24][15590]	mAP: 0.2705
+2025-05-09 12:56:38,497 - mmrotate - INFO - Epoch [25][50/366]	lr: 2.500e-05, eta: 0:14:59, time: 3.014, data_time: 0.177, memory: 3127, s0.loss_cls: 0.2981, s0.loss_bbox: 0.4495, sr0.loss_cls: 0.2742, sr0.loss_bbox: 0.3996, loss: 1.4214, grad_norm: 3.5074
+2025-05-09 12:59:18,058 - mmrotate - INFO - Epoch [25][100/366]	lr: 2.500e-05, eta: 0:12:37, time: 3.191, data_time: 0.112, memory: 3127, s0.loss_cls: 0.2989, s0.loss_bbox: 0.4559, sr0.loss_cls: 0.2752, sr0.loss_bbox: 0.4122, loss: 1.4422, grad_norm: 3.4392
+2025-05-09 13:01:47,169 - mmrotate - INFO - Epoch [25][150/366]	lr: 2.500e-05, eta: 0:10:15, time: 2.982, data_time: 0.127, memory: 3127, s0.loss_cls: 0.2996, s0.loss_bbox: 0.4503, sr0.loss_cls: 0.2748, sr0.loss_bbox: 0.3987, loss: 1.4234, grad_norm: 3.5165
+2025-05-09 13:04:00,723 - mmrotate - INFO - Epoch [25][200/366]	lr: 2.500e-05, eta: 0:07:52, time: 2.671, data_time: 0.142, memory: 3127, s0.loss_cls: 0.2965, s0.loss_bbox: 0.4532, sr0.loss_cls: 0.2729, sr0.loss_bbox: 0.4111, loss: 1.4337, grad_norm: 3.4759
+2025-05-09 13:05:54,138 - mmrotate - INFO - Epoch [25][250/366]	lr: 2.500e-05, eta: 0:05:30, time: 2.268, data_time: 0.131, memory: 3127, s0.loss_cls: 0.3008, s0.loss_bbox: 0.4603, sr0.loss_cls: 0.2724, sr0.loss_bbox: 0.4127, loss: 1.4462, grad_norm: 3.5357
+2025-05-09 13:07:54,069 - mmrotate - INFO - Epoch [25][300/366]	lr: 2.500e-05, eta: 0:03:07, time: 2.399, data_time: 0.137, memory: 3127, s0.loss_cls: 0.3012, s0.loss_bbox: 0.4764, sr0.loss_cls: 0.2788, sr0.loss_bbox: 0.4153, loss: 1.4717, grad_norm: 3.6107
+2025-05-09 13:10:02,496 - mmrotate - INFO - Epoch [25][350/366]	lr: 2.500e-05, eta: 0:00:45, time: 2.569, data_time: 0.135, memory: 3127, s0.loss_cls: 0.2972, s0.loss_bbox: 0.4500, sr0.loss_cls: 0.2752, sr0.loss_bbox: 0.4032, loss: 1.4257, grad_norm: 3.4516
+2025-05-09 13:10:45,112 - mmrotate - INFO - Saving checkpoint at 25 epochs
+2025-05-09 13:19:53,726 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 30179  | 0.512  | 0.285 |
+| FCBK   | 11134 | 301034 | 0.473  | 0.236 |
+| Zigzag | 9050  | 186055 | 0.551  | 0.296 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.272 |
++--------+-------+--------+--------+-------+
+2025-05-09 13:19:53,814 - mmrotate - INFO - Exp name: r3det_tiny_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 13:19:53,815 - mmrotate - INFO - Epoch(val) [25][15590]	mAP: 0.2724

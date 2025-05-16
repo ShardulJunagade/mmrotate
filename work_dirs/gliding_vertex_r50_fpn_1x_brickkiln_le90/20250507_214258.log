@@ -1,0 +1,848 @@
+2025-05-07 21:42:58,135 - mmrotate - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.20 | packaged by conda-forge | (default, Sep 30 2024, 17:52:49) [GCC 13.3.0]
+CUDA available: True
+GPU 0: NVIDIA A100-SXM4-80GB
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 10.1, V10.1.24
+GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+PyTorch: 1.9.0+cu111
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.1.2 (Git Hash 98be7e8afa711dc9b66c8ff3504129cb82013cdb)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.1
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.1, CUDNN_VERSION=8.0.5, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.9.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.10.0+cu111
+OpenCV: 4.11.0
+MMCV: 1.7.2
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.1
+MMRotate: 0.3.4+b030f38
+------------------------------------------------------------
+
+2025-05-07 21:42:58,825 - mmrotate - INFO - Distributed training: True
+2025-05-07 21:42:59,491 - mmrotate - INFO - Config:
+dataset_type = 'BrickKilnDataset'
+data_root = '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='RResize', img_scale=(128, 128)),
+    dict(
+        type='RRandomFlip',
+        flip_ratio=[0.25, 0.25, 0.25],
+        direction=['horizontal', 'vertical', 'diagonal'],
+        version='le90'),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(128, 128),
+        flip=False,
+        transforms=[
+            dict(type='RResize'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=128,
+    workers_per_gpu=2,
+    train=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='RResize', img_scale=(128, 128)),
+            dict(
+                type='RRandomFlip',
+                flip_ratio=[0.25, 0.25, 0.25],
+                direction=['horizontal', 'vertical', 'diagonal'],
+                version='le90'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
+        version='le90'),
+    val=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='le90'),
+    test=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='le90'))
+evaluation = dict(interval=1, metric='mAP')
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.3333333333333333,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=25)
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+angle_version = 'le90'
+model = dict(
+    type='GlidingVertex',
+    backbone=dict(
+        type='ResNet',
+        depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        norm_eval=True,
+        style='pytorch',
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
+    neck=dict(
+        type='FPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RotatedRPNHead',
+        version='le90',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(
+            type='SmoothL1Loss', beta=0.1111111111111111, loss_weight=1.0)),
+    roi_head=dict(
+        type='GVRatioRoIHead',
+        version='le90',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='GVBBoxHead',
+            version='le90',
+            num_shared_fcs=2,
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=3,
+            ratio_thr=0.8,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=(0.0, 0.0, 0.0, 0.0),
+                target_stds=(0.1, 0.1, 0.2, 0.2)),
+            fix_coder=dict(type='GVFixCoder', angle_range='le90'),
+            ratio_coder=dict(type='GVRatioCoder', angle_range='le90'),
+            reg_class_agnostic=True,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0),
+            loss_fix=dict(
+                type='SmoothL1Loss', beta=0.3333333333333333, loss_weight=1.0),
+            loss_ratio=dict(
+                type='SmoothL1Loss', beta=0.3333333333333333,
+                loss_weight=16.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=0,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=False,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            pos_weight=-1,
+            debug=False)),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            nms_pre=2000,
+            min_bbox_size=0,
+            score_thr=0.05,
+            nms=dict(iou_thr=0.1),
+            max_per_img=2000)))
+batch_size = 128
+num_epochs = 25
+work_dir = './work_dirs/gliding_vertex_r50_fpn_1x_brickkiln_le90'
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2025-05-07 21:42:59,491 - mmrotate - INFO - Set random seed to 0, deterministic: False
+2025-05-07 21:43:08,975 - mmrotate - INFO - Start running, host: shardul.junagade@ramanujan, work_dir: /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/gliding_vertex_r50_fpn_1x_brickkiln_le90
+2025-05-07 21:43:08,976 - mmrotate - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2025-05-07 21:43:08,976 - mmrotate - INFO - workflow: [('train', 1)], max: 25 epochs
+2025-05-07 21:43:08,976 - mmrotate - INFO - Checkpoints will be saved to /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/gliding_vertex_r50_fpn_1x_brickkiln_le90 by HardDiskBackend.
+2025-05-07 21:45:56,603 - mmrotate - INFO - Epoch [1][50/366]	lr: 1.993e-03, eta: 8:28:27, time: 3.352, data_time: 0.125, memory: 12539, loss_rpn_cls: 0.1236, loss_rpn_bbox: 0.0000, loss_cls: 0.2849, acc: 97.3475, loss_bbox: 0.0000, loss_fix: 0.0007, loss_ratio: 0.0001, loss: 0.4093, grad_norm: 2.1235
+2025-05-07 21:49:12,950 - mmrotate - INFO - Epoch [1][100/366]	lr: 2.327e-03, eta: 9:08:59, time: 3.927, data_time: 0.072, memory: 12539, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0751, acc: 99.7355, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0760, grad_norm: 0.1431
+2025-05-07 21:52:58,369 - mmrotate - INFO - Epoch [1][150/366]	lr: 2.660e-03, eta: 9:49:23, time: 4.508, data_time: 0.076, memory: 12539, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.1387, acc: 99.7366, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.1395, grad_norm: 0.1173
+2025-05-07 21:56:03,650 - mmrotate - INFO - Epoch [1][200/366]	lr: 2.993e-03, eta: 9:37:46, time: 3.706, data_time: 0.071, memory: 12539, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.2366, acc: 99.7317, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.2375, grad_norm: 0.2203
+2025-05-07 21:59:32,724 - mmrotate - INFO - Epoch [1][250/366]	lr: 3.327e-03, eta: 9:43:41, time: 4.181, data_time: 0.072, memory: 12539, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.2852, acc: 99.7386, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.2862, grad_norm: 0.3373
+2025-05-07 22:03:02,064 - mmrotate - INFO - Epoch [1][300/366]	lr: 3.660e-03, eta: 9:46:35, time: 4.187, data_time: 0.071, memory: 12539, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.2045, acc: 99.8018, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.2052, grad_norm: 0.3655
+2025-05-07 22:06:09,825 - mmrotate - INFO - Epoch [1][350/366]	lr: 3.993e-03, eta: 9:38:38, time: 3.755, data_time: 0.068, memory: 12539, loss_rpn_cls: 0.0006, loss_rpn_bbox: 0.0001, loss_cls: 0.1004, acc: 99.8018, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.1017, grad_norm: 1.3338
+2025-05-07 22:07:20,956 - mmrotate - INFO - Saving checkpoint at 1 epochs
+2025-05-07 22:15:12,690 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 0    | 0.000  | 0.000 |
+| Zigzag | 9050  | 0    | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-07 22:15:12,766 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-07 22:15:12,766 - mmrotate - INFO - Epoch(val) [1][15590]	mAP: 0.0000
+2025-05-07 22:19:17,666 - mmrotate - INFO - Epoch [2][50/366]	lr: 4.433e-03, eta: 9:28:52, time: 4.898, data_time: 0.119, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0001, loss_cls: 0.0219, acc: 99.7357, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0230, grad_norm: 0.0859
+2025-05-07 22:22:42,416 - mmrotate - INFO - Epoch [2][100/366]	lr: 4.767e-03, eta: 9:28:31, time: 4.095, data_time: 0.077, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0196, acc: 99.7319, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0205, grad_norm: 0.0754
+2025-05-07 22:25:59,231 - mmrotate - INFO - Epoch [2][150/366]	lr: 5.000e-03, eta: 9:25:21, time: 3.936, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0235, acc: 99.7363, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0245, grad_norm: 0.1193
+2025-05-07 22:29:40,028 - mmrotate - INFO - Epoch [2][200/366]	lr: 5.000e-03, eta: 9:28:14, time: 4.416, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0284, acc: 99.7341, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0293, grad_norm: 0.7109
+2025-05-07 22:32:46,007 - mmrotate - INFO - Epoch [2][250/366]	lr: 5.000e-03, eta: 9:22:01, time: 3.720, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0230, acc: 99.7878, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0238, grad_norm: 0.6405
+2025-05-07 22:36:12,706 - mmrotate - INFO - Epoch [2][300/366]	lr: 5.000e-03, eta: 9:20:40, time: 4.134, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0176, acc: 99.8411, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0184, grad_norm: 0.2373
+2025-05-07 22:39:42,391 - mmrotate - INFO - Epoch [2][350/366]	lr: 5.000e-03, eta: 9:19:36, time: 4.194, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0035, loss_rpn_bbox: 0.0001, loss_cls: 0.0421, acc: 99.6703, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0465, grad_norm: 1.7423
+2025-05-07 22:40:41,993 - mmrotate - INFO - Saving checkpoint at 2 epochs
+2025-05-07 22:48:25,494 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 0    | 0.000  | 0.000 |
+| Zigzag | 9050  | 0    | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-07 22:48:25,571 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-07 22:48:25,571 - mmrotate - INFO - Epoch(val) [2][15590]	mAP: 0.0000
+2025-05-07 22:51:39,532 - mmrotate - INFO - Epoch [3][50/366]	lr: 5.000e-03, eta: 9:02:57, time: 3.879, data_time: 0.139, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0183, acc: 99.7352, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0192, grad_norm: 0.0861
+2025-05-07 22:55:41,358 - mmrotate - INFO - Epoch [3][100/366]	lr: 5.000e-03, eta: 9:07:34, time: 4.837, data_time: 0.080, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0148, acc: 99.7366, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0156, grad_norm: 0.0904
+2025-05-07 22:59:22,724 - mmrotate - INFO - Epoch [3][150/366]	lr: 5.000e-03, eta: 9:08:00, time: 4.427, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0129, acc: 99.7318, loss_bbox: 0.0000, loss_fix: 0.0007, loss_ratio: 0.0001, loss: 0.0138, grad_norm: 0.1618
+2025-05-07 23:02:58,684 - mmrotate - INFO - Epoch [3][200/366]	lr: 5.000e-03, eta: 9:07:12, time: 4.319, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0113, acc: 99.7351, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0121, grad_norm: 0.2435
+2025-05-07 23:06:37,719 - mmrotate - INFO - Epoch [3][250/366]	lr: 5.000e-03, eta: 9:06:33, time: 4.381, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0100, acc: 99.7359, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0110, grad_norm: 0.1299
+2025-05-07 23:09:40,838 - mmrotate - INFO - Epoch [3][300/366]	lr: 5.000e-03, eta: 9:00:54, time: 3.662, data_time: 0.080, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0090, acc: 99.7349, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0099, grad_norm: 0.2720
+2025-05-07 23:13:02,866 - mmrotate - INFO - Epoch [3][350/366]	lr: 5.000e-03, eta: 8:57:50, time: 4.041, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, loss_cls: 0.0079, acc: 99.7356, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0091, grad_norm: 0.3533
+2025-05-07 23:14:13,318 - mmrotate - INFO - Saving checkpoint at 3 epochs
+2025-05-07 23:22:00,962 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 0    | 0.000  | 0.000 |
+| Zigzag | 9050  | 0    | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-07 23:22:01,036 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-07 23:22:01,036 - mmrotate - INFO - Epoch(val) [3][15590]	mAP: 0.0000
+2025-05-07 23:25:40,506 - mmrotate - INFO - Epoch [4][50/366]	lr: 5.000e-03, eta: 8:48:15, time: 4.389, data_time: 0.128, memory: 12540, loss_rpn_cls: 0.0013, loss_rpn_bbox: 0.0000, loss_cls: 0.0213, acc: 99.7362, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0233, grad_norm: 0.3549
+2025-05-07 23:28:45,976 - mmrotate - INFO - Epoch [4][100/366]	lr: 5.000e-03, eta: 8:43:34, time: 3.709, data_time: 0.079, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0099, acc: 99.7346, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0107, grad_norm: 0.0928
+2025-05-07 23:32:15,007 - mmrotate - INFO - Epoch [4][150/366]	lr: 5.000e-03, eta: 8:41:29, time: 4.181, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0069, acc: 99.7565, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0079, grad_norm: 0.1461
+2025-05-07 23:35:41,607 - mmrotate - INFO - Epoch [4][200/366]	lr: 5.000e-03, eta: 8:39:03, time: 4.132, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0058, acc: 99.7918, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0068, grad_norm: 0.1701
+2025-05-07 23:39:06,737 - mmrotate - INFO - Epoch [4][250/366]	lr: 5.000e-03, eta: 8:36:24, time: 4.103, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0142, acc: 99.7891, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0149, grad_norm: 0.9508
+2025-05-07 23:43:11,588 - mmrotate - INFO - Epoch [4][300/366]	lr: 5.000e-03, eta: 8:37:22, time: 4.897, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, loss_cls: 0.0165, acc: 99.7351, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0176, grad_norm: 0.3033
+2025-05-07 23:46:36,239 - mmrotate - INFO - Epoch [4][350/366]	lr: 5.000e-03, eta: 8:34:26, time: 4.093, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0073, acc: 99.7490, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0082, grad_norm: 0.0901
+2025-05-07 23:47:34,802 - mmrotate - INFO - Saving checkpoint at 4 epochs
+2025-05-07 23:55:24,856 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 1    | 0.000  | 0.000 |
+| FCBK   | 11134 | 3362 | 0.000  | 0.000 |
+| Zigzag | 9050  | 2410 | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-07 23:55:24,934 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-07 23:55:24,934 - mmrotate - INFO - Epoch(val) [4][15590]	mAP: 0.0000
+2025-05-07 23:58:30,892 - mmrotate - INFO - Epoch [5][50/366]	lr: 5.000e-03, eta: 8:23:25, time: 3.719, data_time: 0.126, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0054, acc: 99.8056, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0063, grad_norm: 0.0801
+2025-05-08 00:02:08,664 - mmrotate - INFO - Epoch [5][100/366]	lr: 5.000e-03, eta: 8:21:44, time: 4.355, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0048, acc: 99.8231, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0054, grad_norm: 0.0799
+2025-05-08 00:05:19,145 - mmrotate - INFO - Epoch [5][150/366]	lr: 5.000e-03, eta: 8:17:49, time: 3.810, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0043, acc: 99.8369, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0949
+2025-05-08 00:08:29,529 - mmrotate - INFO - Epoch [5][200/366]	lr: 5.000e-03, eta: 8:13:55, time: 3.808, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8434, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0875
+2025-05-08 00:12:05,839 - mmrotate - INFO - Epoch [5][250/366]	lr: 5.000e-03, eta: 8:11:57, time: 4.326, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8450, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0870
+2025-05-08 00:15:14,367 - mmrotate - INFO - Epoch [5][300/366]	lr: 5.000e-03, eta: 8:07:57, time: 3.771, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8517, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0908
+2025-05-08 00:18:33,208 - mmrotate - INFO - Epoch [5][350/366]	lr: 5.000e-03, eta: 8:04:41, time: 3.977, data_time: 0.077, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8535, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0841
+2025-05-08 00:19:53,799 - mmrotate - INFO - Saving checkpoint at 5 epochs
+2025-05-08 00:28:14,663 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 3533 | 0.000  | 0.000 |
+| Zigzag | 9050  | 2206 | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-08 00:28:14,747 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 00:28:14,747 - mmrotate - INFO - Epoch(val) [5][15590]	mAP: 0.0001
+2025-05-08 00:31:51,701 - mmrotate - INFO - Epoch [6][50/366]	lr: 5.000e-03, eta: 7:57:27, time: 4.339, data_time: 0.130, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8577, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0629
+2025-05-08 00:34:57,450 - mmrotate - INFO - Epoch [6][100/366]	lr: 5.000e-03, eta: 7:53:28, time: 3.715, data_time: 0.077, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8577, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0959
+2025-05-08 00:38:14,701 - mmrotate - INFO - Epoch [6][150/366]	lr: 5.000e-03, eta: 7:50:13, time: 3.945, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8692, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0826
+2025-05-08 00:41:50,404 - mmrotate - INFO - Epoch [6][200/366]	lr: 5.000e-03, eta: 7:48:03, time: 4.314, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8632, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.1118
+2025-05-08 00:44:50,832 - mmrotate - INFO - Epoch [6][250/366]	lr: 5.000e-03, eta: 7:43:48, time: 3.609, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8654, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0042, grad_norm: 0.0842
+2025-05-08 00:48:08,858 - mmrotate - INFO - Epoch [6][300/366]	lr: 5.000e-03, eta: 7:40:36, time: 3.961, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8665, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0915
+2025-05-08 00:51:38,005 - mmrotate - INFO - Epoch [6][350/366]	lr: 5.000e-03, eta: 7:37:58, time: 4.183, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8665, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.0830
+2025-05-08 00:52:36,689 - mmrotate - INFO - Saving checkpoint at 6 epochs
+2025-05-08 01:00:30,530 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 3075 | 0.000  | 0.000 |
+| Zigzag | 9050  | 1679 | 0.000  | 0.004 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 01:00:30,602 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 01:00:30,603 - mmrotate - INFO - Epoch(val) [6][15590]	mAP: 0.0014
+2025-05-08 01:03:57,560 - mmrotate - INFO - Epoch [7][50/366]	lr: 5.000e-03, eta: 7:30:54, time: 4.139, data_time: 0.121, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8678, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0042, grad_norm: 0.1030
+2025-05-08 01:07:54,059 - mmrotate - INFO - Epoch [7][100/366]	lr: 5.000e-03, eta: 7:29:39, time: 4.730, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0034, acc: 99.8692, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0041, grad_norm: 0.1348
+2025-05-08 01:11:29,387 - mmrotate - INFO - Epoch [7][150/366]	lr: 5.000e-03, eta: 7:27:16, time: 4.307, data_time: 0.077, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0034, acc: 99.8723, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0042, grad_norm: 0.1066
+2025-05-08 01:14:34,399 - mmrotate - INFO - Epoch [7][200/366]	lr: 5.000e-03, eta: 7:23:25, time: 3.700, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0034, acc: 99.8730, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.0889
+2025-05-08 01:18:12,959 - mmrotate - INFO - Epoch [7][250/366]	lr: 5.000e-03, eta: 7:21:07, time: 4.371, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0034, acc: 99.8714, loss_bbox: 0.0000, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0042, grad_norm: 0.1007
+2025-05-08 01:21:24,524 - mmrotate - INFO - Epoch [7][300/366]	lr: 5.000e-03, eta: 7:17:34, time: 3.831, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8731, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.1322
+2025-05-08 01:24:38,544 - mmrotate - INFO - Epoch [7][350/366]	lr: 5.000e-03, eta: 7:14:08, time: 3.880, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8723, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.1346
+2025-05-08 01:25:48,474 - mmrotate - INFO - Saving checkpoint at 7 epochs
+2025-05-08 01:33:34,311 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 5146 | 0.000  | 0.000 |
+| Zigzag | 9050  | 2559 | 0.001  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 01:33:34,392 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 01:33:34,392 - mmrotate - INFO - Epoch(val) [7][15590]	mAP: 0.0006
+2025-05-08 01:37:17,898 - mmrotate - INFO - Epoch [8][50/366]	lr: 5.000e-03, eta: 7:08:16, time: 4.470, data_time: 0.124, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8683, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.1225
+2025-05-08 01:39:33,426 - mmrotate - INFO - Epoch [8][100/366]	lr: 5.000e-03, eta: 7:02:30, time: 2.711, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8714, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.1345
+2025-05-08 01:41:38,964 - mmrotate - INFO - Epoch [8][150/366]	lr: 5.000e-03, eta: 6:56:29, time: 2.511, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8720, loss_bbox: 0.0001, loss_fix: 0.0005, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0907
+2025-05-08 01:43:55,559 - mmrotate - INFO - Epoch [8][200/366]	lr: 5.000e-03, eta: 6:51:02, time: 2.732, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8704, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.1634
+2025-05-08 01:46:12,354 - mmrotate - INFO - Epoch [8][250/366]	lr: 5.000e-03, eta: 6:45:42, time: 2.736, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8641, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.1380
+2025-05-08 01:48:29,003 - mmrotate - INFO - Epoch [8][300/366]	lr: 5.000e-03, eta: 6:40:29, time: 2.733, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8694, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.1062
+2025-05-08 01:50:30,772 - mmrotate - INFO - Epoch [8][350/366]	lr: 5.000e-03, eta: 6:34:49, time: 2.435, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8698, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.1339
+2025-05-08 01:51:10,301 - mmrotate - INFO - Saving checkpoint at 8 epochs
+2025-05-08 01:57:01,884 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 1    | 0.000  | 0.000 |
+| FCBK   | 11134 | 8194 | 0.001  | 0.000 |
+| Zigzag | 9050  | 3883 | 0.002  | 0.003 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 01:57:01,967 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 01:57:01,967 - mmrotate - INFO - Epoch(val) [8][15590]	mAP: 0.0009
+2025-05-08 01:59:11,207 - mmrotate - INFO - Epoch [9][50/366]	lr: 5.000e-04, eta: 6:26:27, time: 2.585, data_time: 0.126, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8746, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0043, grad_norm: 0.0661
+2025-05-08 02:01:15,891 - mmrotate - INFO - Epoch [9][100/366]	lr: 5.000e-04, eta: 6:21:11, time: 2.494, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8692, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0780
+2025-05-08 02:03:23,038 - mmrotate - INFO - Epoch [9][150/366]	lr: 5.000e-04, eta: 6:16:07, time: 2.543, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8738, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0785
+2025-05-08 02:05:29,420 - mmrotate - INFO - Epoch [9][200/366]	lr: 5.000e-04, eta: 6:11:07, time: 2.528, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8735, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0920
+2025-05-08 02:07:36,377 - mmrotate - INFO - Epoch [9][250/366]	lr: 5.000e-04, eta: 6:06:13, time: 2.539, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8712, loss_bbox: 0.0001, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0932
+2025-05-08 02:09:44,877 - mmrotate - INFO - Epoch [9][300/366]	lr: 5.000e-04, eta: 6:01:27, time: 2.570, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8701, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0758
+2025-05-08 02:12:00,604 - mmrotate - INFO - Epoch [9][350/366]	lr: 5.000e-04, eta: 5:56:59, time: 2.715, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8718, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0737
+2025-05-08 02:12:44,750 - mmrotate - INFO - Saving checkpoint at 9 epochs
+2025-05-08 02:18:46,647 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 2    | 0.000  | 0.000 |
+| FCBK   | 11134 | 5717 | 0.001  | 0.000 |
+| Zigzag | 9050  | 2899 | 0.002  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 02:18:46,808 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 02:18:46,809 - mmrotate - INFO - Epoch(val) [9][15590]	mAP: 0.0009
+2025-05-08 02:20:56,452 - mmrotate - INFO - Epoch [10][50/366]	lr: 5.000e-04, eta: 5:49:45, time: 2.593, data_time: 0.125, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8746, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0771
+2025-05-08 02:23:03,649 - mmrotate - INFO - Epoch [10][100/366]	lr: 5.000e-04, eta: 5:45:14, time: 2.544, data_time: 0.076, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8699, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0803
+2025-05-08 02:25:11,675 - mmrotate - INFO - Epoch [10][150/366]	lr: 5.000e-04, eta: 5:40:48, time: 2.561, data_time: 0.077, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8708, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0759
+2025-05-08 02:27:18,169 - mmrotate - INFO - Epoch [10][200/366]	lr: 5.000e-04, eta: 5:36:24, time: 2.530, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8680, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0753
+2025-05-08 02:29:25,342 - mmrotate - INFO - Epoch [10][250/366]	lr: 5.000e-04, eta: 5:32:04, time: 2.543, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8704, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0707
+2025-05-08 02:31:31,362 - mmrotate - INFO - Epoch [10][300/366]	lr: 5.000e-04, eta: 5:27:46, time: 2.520, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8707, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0732
+2025-05-08 02:33:38,664 - mmrotate - INFO - Epoch [10][350/366]	lr: 5.000e-04, eta: 5:23:34, time: 2.546, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0035, acc: 99.8772, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0708
+2025-05-08 02:34:18,871 - mmrotate - INFO - Saving checkpoint at 10 epochs
+2025-05-08 02:40:23,022 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 3    | 0.000  | 0.000 |
+| FCBK   | 11134 | 6337 | 0.000  | 0.000 |
+| Zigzag | 9050  | 3292 | 0.002  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 02:40:23,106 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 02:40:23,107 - mmrotate - INFO - Epoch(val) [10][15590]	mAP: 0.0009
+2025-05-08 02:42:44,790 - mmrotate - INFO - Epoch [11][50/366]	lr: 5.000e-04, eta: 5:17:28, time: 2.833, data_time: 0.122, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8688, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0707
+2025-05-08 02:44:51,395 - mmrotate - INFO - Epoch [11][100/366]	lr: 5.000e-04, eta: 5:13:24, time: 2.532, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8718, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0769
+2025-05-08 02:46:57,982 - mmrotate - INFO - Epoch [11][150/366]	lr: 5.000e-04, eta: 5:09:22, time: 2.532, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8701, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0755
+2025-05-08 02:49:04,115 - mmrotate - INFO - Epoch [11][200/366]	lr: 5.000e-04, eta: 5:05:23, time: 2.523, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8745, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0680
+2025-05-08 02:51:09,877 - mmrotate - INFO - Epoch [11][250/366]	lr: 5.000e-04, eta: 5:01:26, time: 2.515, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8719, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0757
+2025-05-08 02:53:16,431 - mmrotate - INFO - Epoch [11][300/366]	lr: 5.000e-04, eta: 4:57:33, time: 2.531, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8704, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0731
+2025-05-08 02:55:23,695 - mmrotate - INFO - Epoch [11][350/366]	lr: 5.000e-04, eta: 4:53:44, time: 2.545, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8690, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0771
+2025-05-08 02:56:04,752 - mmrotate - INFO - Saving checkpoint at 11 epochs
+2025-05-08 03:02:01,844 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7629 | 0.001  | 0.000 |
+| Zigzag | 9050  | 4059 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 03:02:01,909 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 03:02:01,910 - mmrotate - INFO - Epoch(val) [11][15590]	mAP: 0.0009
+2025-05-08 03:04:11,678 - mmrotate - INFO - Epoch [12][50/366]	lr: 5.000e-05, eta: 4:47:57, time: 2.595, data_time: 0.118, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8738, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0699
+2025-05-08 03:06:27,927 - mmrotate - INFO - Epoch [12][100/366]	lr: 5.000e-05, eta: 4:44:26, time: 2.725, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8704, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0634
+2025-05-08 03:08:43,877 - mmrotate - INFO - Epoch [12][150/366]	lr: 5.000e-05, eta: 4:40:56, time: 2.719, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8709, loss_bbox: 0.0002, loss_fix: 0.0005, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0862
+2025-05-08 03:10:59,552 - mmrotate - INFO - Epoch [12][200/366]	lr: 5.000e-05, eta: 4:37:27, time: 2.714, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8687, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0689
+2025-05-08 03:13:01,452 - mmrotate - INFO - Epoch [12][250/366]	lr: 5.000e-05, eta: 4:33:44, time: 2.438, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8741, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0650
+2025-05-08 03:15:07,170 - mmrotate - INFO - Epoch [12][300/366]	lr: 5.000e-05, eta: 4:30:08, time: 2.514, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8703, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0724
+2025-05-08 03:17:14,090 - mmrotate - INFO - Epoch [12][350/366]	lr: 5.000e-05, eta: 4:26:35, time: 2.538, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8681, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0661
+2025-05-08 03:17:54,383 - mmrotate - INFO - Saving checkpoint at 12 epochs
+2025-05-08 03:23:50,087 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 4    | 0.000  | 0.000 |
+| FCBK   | 11134 | 6747 | 0.001  | 0.000 |
+| Zigzag | 9050  | 3503 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 03:23:50,166 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 03:23:50,167 - mmrotate - INFO - Epoch(val) [12][15590]	mAP: 0.0008
+2025-05-08 03:25:59,012 - mmrotate - INFO - Epoch [13][50/366]	lr: 5.000e-05, eta: 4:21:16, time: 2.577, data_time: 0.117, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8736, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0738
+2025-05-08 03:28:04,319 - mmrotate - INFO - Epoch [13][100/366]	lr: 5.000e-05, eta: 4:17:47, time: 2.506, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8704, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0682
+2025-05-08 03:30:09,125 - mmrotate - INFO - Epoch [13][150/366]	lr: 5.000e-05, eta: 4:14:19, time: 2.496, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8719, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0716
+2025-05-08 03:32:19,573 - mmrotate - INFO - Epoch [13][200/366]	lr: 5.000e-05, eta: 4:10:59, time: 2.609, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8735, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0725
+2025-05-08 03:34:35,823 - mmrotate - INFO - Epoch [13][250/366]	lr: 5.000e-05, eta: 4:07:45, time: 2.725, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8666, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0681
+2025-05-08 03:36:51,753 - mmrotate - INFO - Epoch [13][300/366]	lr: 5.000e-05, eta: 4:04:33, time: 2.719, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8706, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0050, grad_norm: 0.0813
+2025-05-08 03:39:08,157 - mmrotate - INFO - Epoch [13][350/366]	lr: 5.000e-05, eta: 4:01:22, time: 2.728, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8713, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0673
+2025-05-08 03:39:40,970 - mmrotate - INFO - Saving checkpoint at 13 epochs
+2025-05-08 03:45:38,375 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 4    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7014 | 0.001  | 0.000 |
+| Zigzag | 9050  | 3653 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 03:45:38,452 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 03:45:38,452 - mmrotate - INFO - Epoch(val) [13][15590]	mAP: 0.0008
+2025-05-08 03:47:48,679 - mmrotate - INFO - Epoch [14][50/366]	lr: 5.000e-05, eta: 3:56:27, time: 2.604, data_time: 0.123, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8701, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0811
+2025-05-08 03:49:54,691 - mmrotate - INFO - Epoch [14][100/366]	lr: 5.000e-05, eta: 3:53:11, time: 2.520, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8687, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0764
+2025-05-08 03:52:00,944 - mmrotate - INFO - Epoch [14][150/366]	lr: 5.000e-05, eta: 3:49:56, time: 2.525, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8722, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0658
+2025-05-08 03:54:06,514 - mmrotate - INFO - Epoch [14][200/366]	lr: 5.000e-05, eta: 3:46:42, time: 2.511, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8691, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0679
+2025-05-08 03:56:12,261 - mmrotate - INFO - Epoch [14][250/366]	lr: 5.000e-05, eta: 3:43:30, time: 2.515, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8683, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0708
+2025-05-08 03:58:16,025 - mmrotate - INFO - Epoch [14][300/366]	lr: 5.000e-05, eta: 3:40:17, time: 2.475, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8716, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0695
+2025-05-08 04:00:31,450 - mmrotate - INFO - Epoch [14][350/366]	lr: 5.000e-05, eta: 3:37:15, time: 2.709, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8709, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0727
+2025-05-08 04:01:15,467 - mmrotate - INFO - Saving checkpoint at 14 epochs
+2025-05-08 04:07:20,096 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 4    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7477 | 0.001  | 0.000 |
+| Zigzag | 9050  | 3925 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 04:07:20,184 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 04:07:20,185 - mmrotate - INFO - Epoch(val) [14][15590]	mAP: 0.0008
+2025-05-08 04:09:29,652 - mmrotate - INFO - Epoch [15][50/366]	lr: 5.000e-05, eta: 3:32:38, time: 2.589, data_time: 0.123, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8698, loss_bbox: 0.0003, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0736
+2025-05-08 04:11:34,967 - mmrotate - INFO - Epoch [15][100/366]	lr: 5.000e-05, eta: 3:29:31, time: 2.506, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8732, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0683
+2025-05-08 04:13:41,860 - mmrotate - INFO - Epoch [15][150/366]	lr: 5.000e-05, eta: 3:26:26, time: 2.538, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8715, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0604
+2025-05-08 04:15:46,882 - mmrotate - INFO - Epoch [15][200/366]	lr: 5.000e-05, eta: 3:23:22, time: 2.500, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8710, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0801
+2025-05-08 04:17:51,546 - mmrotate - INFO - Epoch [15][250/366]	lr: 5.000e-05, eta: 3:20:18, time: 2.493, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8695, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0051, grad_norm: 0.0840
+2025-05-08 04:19:56,601 - mmrotate - INFO - Epoch [15][300/366]	lr: 5.000e-05, eta: 3:17:15, time: 2.501, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8723, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0691
+2025-05-08 04:22:01,445 - mmrotate - INFO - Epoch [15][350/366]	lr: 5.000e-05, eta: 3:14:13, time: 2.497, data_time: 0.064, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8701, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0610
+2025-05-08 04:22:41,671 - mmrotate - INFO - Saving checkpoint at 15 epochs
+2025-05-08 04:28:34,405 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 4    | 0.000  | 0.000 |
+| FCBK   | 11134 | 6676 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3430 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.002 |
++--------+-------+------+--------+-------+
+2025-05-08 04:28:34,492 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 04:28:34,492 - mmrotate - INFO - Epoch(val) [15][15590]	mAP: 0.0016
+2025-05-08 04:30:55,133 - mmrotate - INFO - Epoch [16][50/366]	lr: 5.000e-05, eta: 3:10:00, time: 2.813, data_time: 0.123, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8720, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0637
+2025-05-08 04:33:12,912 - mmrotate - INFO - Epoch [16][100/366]	lr: 5.000e-05, eta: 3:07:09, time: 2.756, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8719, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0767
+2025-05-08 04:35:14,966 - mmrotate - INFO - Epoch [16][150/366]	lr: 5.000e-05, eta: 3:04:09, time: 2.441, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8721, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0703
+2025-05-08 04:37:20,092 - mmrotate - INFO - Epoch [16][200/366]	lr: 5.000e-05, eta: 3:01:12, time: 2.503, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8700, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0706
+2025-05-08 04:39:25,309 - mmrotate - INFO - Epoch [16][250/366]	lr: 5.000e-05, eta: 2:58:16, time: 2.504, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8712, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0738
+2025-05-08 04:41:30,449 - mmrotate - INFO - Epoch [16][300/366]	lr: 5.000e-05, eta: 2:55:21, time: 2.503, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8706, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0681
+2025-05-08 04:43:35,542 - mmrotate - INFO - Epoch [16][350/366]	lr: 5.000e-05, eta: 2:52:26, time: 2.502, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8708, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0653
+2025-05-08 04:44:15,320 - mmrotate - INFO - Saving checkpoint at 16 epochs
+2025-05-08 04:50:05,554 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7261 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3781 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 04:50:05,636 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 04:50:05,637 - mmrotate - INFO - Epoch(val) [16][15590]	mAP: 0.0014
+2025-05-08 04:52:13,999 - mmrotate - INFO - Epoch [17][50/366]	lr: 5.000e-05, eta: 2:48:17, time: 2.567, data_time: 0.125, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8676, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0687
+2025-05-08 04:54:21,294 - mmrotate - INFO - Epoch [17][100/366]	lr: 5.000e-05, eta: 2:45:26, time: 2.546, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8719, loss_bbox: 0.0002, loss_fix: 0.0005, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0680
+2025-05-08 04:56:37,630 - mmrotate - INFO - Epoch [17][150/366]	lr: 5.000e-05, eta: 2:42:41, time: 2.727, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8699, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0726
+2025-05-08 04:58:53,944 - mmrotate - INFO - Epoch [17][200/366]	lr: 5.000e-05, eta: 2:39:56, time: 2.726, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8729, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0698
+2025-05-08 05:01:10,050 - mmrotate - INFO - Epoch [17][250/366]	lr: 5.000e-05, eta: 2:37:11, time: 2.722, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8699, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0655
+2025-05-08 05:03:10,309 - mmrotate - INFO - Epoch [17][300/366]	lr: 5.000e-05, eta: 2:34:20, time: 2.405, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8715, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0716
+2025-05-08 05:05:16,934 - mmrotate - INFO - Epoch [17][350/366]	lr: 5.000e-05, eta: 2:31:32, time: 2.532, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8700, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0815
+2025-05-08 05:05:57,687 - mmrotate - INFO - Saving checkpoint at 17 epochs
+2025-05-08 05:11:43,262 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7228 | 0.001  | 0.002 |
+| Zigzag | 9050  | 3769 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 05:11:43,349 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 05:11:43,349 - mmrotate - INFO - Epoch(val) [17][15590]	mAP: 0.0013
+2025-05-08 05:13:51,786 - mmrotate - INFO - Epoch [18][50/366]	lr: 5.000e-05, eta: 2:27:33, time: 2.569, data_time: 0.126, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8732, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0623
+2025-05-08 05:15:57,304 - mmrotate - INFO - Epoch [18][100/366]	lr: 5.000e-05, eta: 2:24:47, time: 2.510, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8707, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0680
+2025-05-08 05:18:02,410 - mmrotate - INFO - Epoch [18][150/366]	lr: 5.000e-05, eta: 2:22:01, time: 2.502, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8714, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0664
+2025-05-08 05:20:07,886 - mmrotate - INFO - Epoch [18][200/366]	lr: 5.000e-05, eta: 2:19:16, time: 2.510, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8699, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0664
+2025-05-08 05:22:17,417 - mmrotate - INFO - Epoch [18][250/366]	lr: 5.000e-05, eta: 2:16:33, time: 2.591, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8663, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0050, grad_norm: 0.0710
+2025-05-08 05:24:34,419 - mmrotate - INFO - Epoch [18][300/366]	lr: 5.000e-05, eta: 2:13:53, time: 2.740, data_time: 0.067, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8700, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0731
+2025-05-08 05:26:51,506 - mmrotate - INFO - Epoch [18][350/366]	lr: 5.000e-05, eta: 2:11:14, time: 2.742, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8721, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0704
+2025-05-08 05:27:35,302 - mmrotate - INFO - Saving checkpoint at 18 epochs
+2025-05-08 05:33:24,273 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 4    | 0.000  | 0.000 |
+| FCBK   | 11134 | 6541 | 0.001  | 0.002 |
+| Zigzag | 9050  | 3368 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 05:33:24,356 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 05:33:24,356 - mmrotate - INFO - Epoch(val) [18][15590]	mAP: 0.0015
+2025-05-08 05:35:33,662 - mmrotate - INFO - Epoch [19][50/366]	lr: 5.000e-05, eta: 2:07:25, time: 2.586, data_time: 0.126, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8715, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0681
+2025-05-08 05:37:40,010 - mmrotate - INFO - Epoch [19][100/366]	lr: 5.000e-05, eta: 2:04:44, time: 2.527, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0036, acc: 99.8717, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0044, grad_norm: 0.0718
+2025-05-08 05:39:46,940 - mmrotate - INFO - Epoch [19][150/366]	lr: 5.000e-05, eta: 2:02:03, time: 2.539, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8701, loss_bbox: 0.0002, loss_fix: 0.0005, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0736
+2025-05-08 05:41:53,856 - mmrotate - INFO - Epoch [19][200/366]	lr: 5.000e-05, eta: 1:59:22, time: 2.538, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8722, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0795
+2025-05-08 05:44:00,447 - mmrotate - INFO - Epoch [19][250/366]	lr: 5.000e-05, eta: 1:56:42, time: 2.532, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8706, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0698
+2025-05-08 05:46:06,877 - mmrotate - INFO - Epoch [19][300/366]	lr: 5.000e-05, eta: 1:54:02, time: 2.529, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8698, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0697
+2025-05-08 05:48:11,103 - mmrotate - INFO - Epoch [19][350/366]	lr: 5.000e-05, eta: 1:51:22, time: 2.485, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8694, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0722
+2025-05-08 05:48:54,596 - mmrotate - INFO - Saving checkpoint at 19 epochs
+2025-05-08 05:55:01,485 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7165 | 0.001  | 0.002 |
+| Zigzag | 9050  | 3712 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 05:55:01,571 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 05:55:01,572 - mmrotate - INFO - Epoch(val) [19][15590]	mAP: 0.0014
+2025-05-08 05:57:09,286 - mmrotate - INFO - Epoch [20][50/366]	lr: 5.000e-05, eta: 1:47:41, time: 2.554, data_time: 0.122, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8723, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0655
+2025-05-08 05:59:14,353 - mmrotate - INFO - Epoch [20][100/366]	lr: 5.000e-05, eta: 1:45:03, time: 2.501, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8727, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0702
+2025-05-08 06:01:19,701 - mmrotate - INFO - Epoch [20][150/366]	lr: 5.000e-05, eta: 1:42:25, time: 2.507, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8703, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0792
+2025-05-08 06:03:25,046 - mmrotate - INFO - Epoch [20][200/366]	lr: 5.000e-05, eta: 1:39:48, time: 2.507, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8673, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0728
+2025-05-08 06:05:29,910 - mmrotate - INFO - Epoch [20][250/366]	lr: 5.000e-05, eta: 1:37:11, time: 2.497, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8712, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0750
+2025-05-08 06:07:34,581 - mmrotate - INFO - Epoch [20][300/366]	lr: 5.000e-05, eta: 1:34:35, time: 2.493, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8698, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0660
+2025-05-08 06:09:39,643 - mmrotate - INFO - Epoch [20][350/366]	lr: 5.000e-05, eta: 1:31:59, time: 2.501, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8716, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0739
+2025-05-08 06:10:19,387 - mmrotate - INFO - Saving checkpoint at 20 epochs
+2025-05-08 06:16:06,870 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7448 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3875 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 06:16:06,942 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 06:16:06,943 - mmrotate - INFO - Epoch(val) [20][15590]	mAP: 0.0014
+2025-05-08 06:18:24,535 - mmrotate - INFO - Epoch [21][50/366]	lr: 5.000e-05, eta: 1:28:27, time: 2.752, data_time: 0.117, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8705, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0813
+2025-05-08 06:20:39,867 - mmrotate - INFO - Epoch [21][100/366]	lr: 5.000e-05, eta: 1:25:55, time: 2.707, data_time: 0.064, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8731, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0612
+2025-05-08 06:22:55,556 - mmrotate - INFO - Epoch [21][150/366]	lr: 5.000e-05, eta: 1:23:23, time: 2.714, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8673, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0687
+2025-05-08 06:25:00,193 - mmrotate - INFO - Epoch [21][200/366]	lr: 5.000e-05, eta: 1:20:49, time: 2.493, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8705, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0050, grad_norm: 0.0781
+2025-05-08 06:27:03,810 - mmrotate - INFO - Epoch [21][250/366]	lr: 5.000e-05, eta: 1:18:15, time: 2.472, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8723, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0696
+2025-05-08 06:29:08,345 - mmrotate - INFO - Epoch [21][300/366]	lr: 5.000e-05, eta: 1:15:41, time: 2.491, data_time: 0.063, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8737, loss_bbox: 0.0002, loss_fix: 0.0005, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0635
+2025-05-08 06:31:13,184 - mmrotate - INFO - Epoch [21][350/366]	lr: 5.000e-05, eta: 1:13:08, time: 2.497, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8697, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0705
+2025-05-08 06:31:53,265 - mmrotate - INFO - Saving checkpoint at 21 epochs
+2025-05-08 06:37:40,353 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7031 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3681 | 0.003  | 0.001 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 06:37:40,436 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 06:37:40,437 - mmrotate - INFO - Epoch(val) [21][15590]	mAP: 0.0014
+2025-05-08 06:39:48,528 - mmrotate - INFO - Epoch [22][50/366]	lr: 5.000e-05, eta: 1:09:40, time: 2.562, data_time: 0.123, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8699, loss_bbox: 0.0003, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0694
+2025-05-08 06:41:53,478 - mmrotate - INFO - Epoch [22][100/366]	lr: 5.000e-05, eta: 1:07:09, time: 2.499, data_time: 0.068, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8674, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0675
+2025-05-08 06:43:57,704 - mmrotate - INFO - Epoch [22][150/366]	lr: 5.000e-05, eta: 1:04:37, time: 2.485, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8692, loss_bbox: 0.0002, loss_fix: 0.0005, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0728
+2025-05-08 06:46:13,417 - mmrotate - INFO - Epoch [22][200/366]	lr: 5.000e-05, eta: 1:02:07, time: 2.714, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8714, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0720
+2025-05-08 06:48:29,465 - mmrotate - INFO - Epoch [22][250/366]	lr: 5.000e-05, eta: 0:59:38, time: 2.721, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8729, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0697
+2025-05-08 06:50:45,598 - mmrotate - INFO - Epoch [22][300/366]	lr: 5.000e-05, eta: 0:57:09, time: 2.723, data_time: 0.065, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8710, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0706
+2025-05-08 06:52:49,166 - mmrotate - INFO - Epoch [22][350/366]	lr: 5.000e-05, eta: 0:54:39, time: 2.471, data_time: 0.066, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8685, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0657
+2025-05-08 06:53:29,657 - mmrotate - INFO - Saving checkpoint at 22 epochs
+2025-05-08 06:59:16,658 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7037 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3680 | 0.003  | 0.001 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 06:59:16,735 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 06:59:16,736 - mmrotate - INFO - Epoch(val) [22][15590]	mAP: 0.0013
+2025-05-08 07:01:26,109 - mmrotate - INFO - Epoch [23][50/366]	lr: 5.000e-05, eta: 0:51:16, time: 2.587, data_time: 0.128, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8706, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0774
+2025-05-08 07:03:33,120 - mmrotate - INFO - Epoch [23][100/366]	lr: 5.000e-05, eta: 0:48:47, time: 2.540, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8710, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0691
+2025-05-08 07:05:39,707 - mmrotate - INFO - Epoch [23][150/366]	lr: 5.000e-05, eta: 0:46:18, time: 2.532, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8706, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0716
+2025-05-08 07:07:46,899 - mmrotate - INFO - Epoch [23][200/366]	lr: 5.000e-05, eta: 0:43:49, time: 2.544, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8694, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0674
+2025-05-08 07:09:53,981 - mmrotate - INFO - Epoch [23][250/366]	lr: 5.000e-05, eta: 0:41:21, time: 2.542, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8701, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0671
+2025-05-08 07:12:01,821 - mmrotate - INFO - Epoch [23][300/366]	lr: 5.000e-05, eta: 0:38:53, time: 2.557, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8698, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0664
+2025-05-08 07:14:18,785 - mmrotate - INFO - Epoch [23][350/366]	lr: 5.000e-05, eta: 0:36:26, time: 2.739, data_time: 0.074, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8693, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0725
+2025-05-08 07:15:02,494 - mmrotate - INFO - Saving checkpoint at 23 epochs
+2025-05-08 07:21:04,602 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7213 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3761 | 0.003  | 0.001 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 07:21:04,686 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 07:21:04,687 - mmrotate - INFO - Epoch(val) [23][15590]	mAP: 0.0014
+2025-05-08 07:23:14,134 - mmrotate - INFO - Epoch [24][50/366]	lr: 5.000e-05, eta: 0:33:08, time: 2.589, data_time: 0.131, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8673, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0733
+2025-05-08 07:25:20,724 - mmrotate - INFO - Epoch [24][100/366]	lr: 5.000e-05, eta: 0:30:40, time: 2.532, data_time: 0.075, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8668, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0774
+2025-05-08 07:27:26,238 - mmrotate - INFO - Epoch [24][150/366]	lr: 5.000e-05, eta: 0:28:13, time: 2.510, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8707, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0779
+2025-05-08 07:29:31,720 - mmrotate - INFO - Epoch [24][200/366]	lr: 5.000e-05, eta: 0:25:47, time: 2.510, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8721, loss_bbox: 0.0003, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0722
+2025-05-08 07:31:37,054 - mmrotate - INFO - Epoch [24][250/366]	lr: 5.000e-05, eta: 0:23:20, time: 2.507, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8696, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0689
+2025-05-08 07:33:42,323 - mmrotate - INFO - Epoch [24][300/366]	lr: 5.000e-05, eta: 0:20:54, time: 2.505, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8677, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0751
+2025-05-08 07:35:47,786 - mmrotate - INFO - Epoch [24][350/366]	lr: 5.000e-05, eta: 0:18:28, time: 2.509, data_time: 0.072, memory: 12540, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8711, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0050, grad_norm: 0.0775
+2025-05-08 07:36:28,035 - mmrotate - INFO - Saving checkpoint at 24 epochs
+2025-05-08 07:42:24,448 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7158 | 0.001  | 0.003 |
+| Zigzag | 9050  | 3740 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 07:42:24,538 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 07:42:24,538 - mmrotate - INFO - Epoch(val) [24][15590]	mAP: 0.0013
+2025-05-08 07:44:43,964 - mmrotate - INFO - Epoch [25][50/366]	lr: 5.000e-05, eta: 0:15:14, time: 2.788, data_time: 0.127, memory: 12540, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8740, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0049, grad_norm: 0.0798
+2025-05-08 07:47:00,717 - mmrotate - INFO - Epoch [25][100/366]	lr: 5.000e-05, eta: 0:12:49, time: 2.735, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8702, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0730
+2025-05-08 07:48:58,715 - mmrotate - INFO - Epoch [25][150/366]	lr: 5.000e-05, eta: 0:10:24, time: 2.360, data_time: 0.070, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8719, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0045, grad_norm: 0.0651
+2025-05-08 07:51:03,428 - mmrotate - INFO - Epoch [25][200/366]	lr: 5.000e-05, eta: 0:07:59, time: 2.494, data_time: 0.073, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0037, acc: 99.8719, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0046, grad_norm: 0.0622
+2025-05-08 07:53:08,520 - mmrotate - INFO - Epoch [25][250/366]	lr: 5.000e-05, eta: 0:05:34, time: 2.502, data_time: 0.071, memory: 12540, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8677, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0686
+2025-05-08 07:55:13,909 - mmrotate - INFO - Epoch [25][300/366]	lr: 5.000e-05, eta: 0:03:10, time: 2.508, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0039, acc: 99.8683, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0048, grad_norm: 0.0712
+2025-05-08 07:57:18,797 - mmrotate - INFO - Epoch [25][350/366]	lr: 5.000e-05, eta: 0:00:46, time: 2.498, data_time: 0.069, memory: 12540, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, loss_cls: 0.0038, acc: 99.8676, loss_bbox: 0.0002, loss_fix: 0.0006, loss_ratio: 0.0001, loss: 0.0047, grad_norm: 0.0826
+2025-05-08 07:57:59,043 - mmrotate - INFO - Saving checkpoint at 25 epochs
+2025-05-08 08:03:45,374 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 5    | 0.000  | 0.000 |
+| FCBK   | 11134 | 7287 | 0.001  | 0.002 |
+| Zigzag | 9050  | 3823 | 0.003  | 0.002 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.001 |
++--------+-------+------+--------+-------+
+2025-05-08 08:03:45,452 - mmrotate - INFO - Exp name: gliding_vertex_r50_fpn_1x_brickkiln_le90.py
+2025-05-08 08:03:45,453 - mmrotate - INFO - Epoch(val) [25][15590]	mAP: 0.0013

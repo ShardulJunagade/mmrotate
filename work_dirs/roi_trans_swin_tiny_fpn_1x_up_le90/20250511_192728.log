@@ -1,0 +1,795 @@
+2025-05-11 19:27:29,027 - mmrotate - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.20 | packaged by conda-forge | (default, Sep 30 2024, 17:52:49) [GCC 13.3.0]
+CUDA available: True
+GPU 0: NVIDIA A100-SXM4-80GB
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 10.1, V10.1.24
+GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+PyTorch: 1.9.0+cu111
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.1.2 (Git Hash 98be7e8afa711dc9b66c8ff3504129cb82013cdb)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.1
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.1, CUDNN_VERSION=8.0.5, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.9.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.10.0+cu111
+OpenCV: 4.11.0
+MMCV: 1.7.2
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.1
+MMRotate: 0.3.4+b030f38
+------------------------------------------------------------
+
+2025-05-11 19:27:30,238 - mmrotate - INFO - Distributed training: True
+2025-05-11 19:27:31,500 - mmrotate - INFO - Config:
+dataset_type = 'BrickKilnDataset'
+data_root = '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='RResize', img_scale=(128, 128)),
+    dict(
+        type='RRandomFlip',
+        flip_ratio=[0.25, 0.25, 0.25],
+        direction=['horizontal', 'vertical', 'diagonal'],
+        version='le90'),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(128, 128),
+        flip=False,
+        transforms=[
+            dict(type='RResize'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=128,
+    workers_per_gpu=2,
+    train=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/train/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/train/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='RResize', img_scale=(128, 128)),
+            dict(
+                type='RRandomFlip',
+                flip_ratio=[0.25, 0.25, 0.25],
+                direction=['horizontal', 'vertical', 'diagonal'],
+                version='le90'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
+        version='le90'),
+    val=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/val/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/val/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='le90'),
+    test=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/test/images/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/uttar_pradesh/test/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='le90'))
+evaluation = dict(interval=1, metric='mAP')
+optimizer = dict(
+    type='AdamW',
+    lr=0.0001,
+    betas=(0.9, 0.999),
+    weight_decay=0.05,
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            absolute_pos_embed=dict(decay_mult=0.0),
+            relative_position_bias_table=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0))))
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.3333333333333333,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=25)
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+angle_version = 'le90'
+model = dict(
+    type='RoITransformer',
+    backbone=dict(
+        type='SwinTransformer',
+        embed_dims=96,
+        depths=[2, 2, 6, 2],
+        num_heads=[3, 6, 12, 24],
+        window_size=7,
+        mlp_ratio=4,
+        qkv_bias=True,
+        qk_scale=None,
+        drop_rate=0.0,
+        attn_drop_rate=0.0,
+        drop_path_rate=0.2,
+        patch_norm=True,
+        out_indices=(0, 1, 2, 3),
+        with_cp=False,
+        convert_weights=True,
+        init_cfg=dict(
+            type='Pretrained',
+            checkpoint=
+            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'
+        )),
+    neck=dict(
+        type='FPN',
+        in_channels=[96, 192, 384, 768],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RotatedRPNHead',
+        in_channels=256,
+        feat_channels=256,
+        version='le90',
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(
+            type='SmoothL1Loss', beta=0.1111111111111111, loss_weight=1.0)),
+    roi_head=dict(
+        type='RoITransRoIHead',
+        version='le90',
+        num_stages=2,
+        stage_loss_weights=[1, 1],
+        bbox_roi_extractor=[
+            dict(
+                type='SingleRoIExtractor',
+                roi_layer=dict(
+                    type='RoIAlign', output_size=7, sampling_ratio=0),
+                out_channels=256,
+                featmap_strides=[4, 8, 16, 32]),
+            dict(
+                type='RotatedSingleRoIExtractor',
+                roi_layer=dict(
+                    type='RoIAlignRotated',
+                    out_size=7,
+                    sample_num=2,
+                    clockwise=True),
+                out_channels=256,
+                featmap_strides=[4, 8, 16, 32])
+        ],
+        bbox_head=[
+            dict(
+                type='RotatedShared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=3,
+                bbox_coder=dict(
+                    type='DeltaXYWHAHBBoxCoder',
+                    angle_range='le90',
+                    norm_factor=2,
+                    edge_swap=True,
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.1, 0.1, 0.2, 0.2, 1]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0)),
+            dict(
+                type='RotatedShared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=3,
+                bbox_coder=dict(
+                    type='DeltaXYWHAOBBoxCoder',
+                    angle_range='le90',
+                    norm_factor=None,
+                    edge_swap=True,
+                    proj_xy=True,
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.05, 0.05, 0.1, 0.1, 0.5]),
+                reg_class_agnostic=False,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
+        ]),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=0,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=[
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.5,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0.5,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1,
+                    iou_calculator=dict(type='BboxOverlaps2D')),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False),
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.5,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0.5,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1,
+                    iou_calculator=dict(type='RBboxOverlaps2D')),
+                sampler=dict(
+                    type='RRandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False)
+        ]),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            nms_pre=2000,
+            min_bbox_size=0,
+            score_thr=0.05,
+            nms=dict(type='le90', iou_thr=0.1),
+            max_per_img=2000)))
+pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'
+num_epochs = 25
+work_dir = './work_dirs/roi_trans_swin_tiny_fpn_1x_up_le90'
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2025-05-11 19:27:31,500 - mmrotate - INFO - Set random seed to 0, deterministic: False
+2025-05-11 19:27:46,014 - mmrotate - INFO - Start running, host: shardul.junagade@ramanujan, work_dir: /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/roi_trans_swin_tiny_fpn_1x_up_le90
+2025-05-11 19:27:46,014 - mmrotate - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2025-05-11 19:27:46,014 - mmrotate - INFO - workflow: [('train', 1)], max: 25 epochs
+2025-05-11 19:27:46,015 - mmrotate - INFO - Checkpoints will be saved to /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/roi_trans_swin_tiny_fpn_1x_up_le90 by HardDiskBackend.
+2025-05-11 19:34:38,051 - mmrotate - INFO - Epoch [1][50/116]	lr: 3.987e-05, eta: 6:31:25, time: 8.241, data_time: 0.131, memory: 18647, loss_rpn_cls: 0.1846, loss_rpn_bbox: 0.0001, s0.loss_cls: 0.3583, s0.acc: 98.4395, s0.loss_bbox: 0.0085, s1.loss_cls: 0.0716, s1.acc: 97.8841, s1.loss_bbox: 0.0054, loss: 0.6285, grad_norm: 5.4428
+2025-05-11 19:41:23,059 - mmrotate - INFO - Epoch [1][100/116]	lr: 4.653e-05, eta: 6:21:17, time: 8.100, data_time: 0.075, memory: 18647, loss_rpn_cls: 0.0007, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.6453, s0.acc: 99.8297, s0.loss_bbox: 0.0052, s1.loss_cls: 0.0068, s1.acc: 99.8172, s1.loss_bbox: 0.0018, loss: 0.6598, grad_norm: 0.7974
+2025-05-11 19:43:29,848 - mmrotate - INFO - Saving checkpoint at 1 epochs
+2025-05-11 19:48:01,923 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 1111 | 0.005  | 0.000 |
+| FCBK   | 3820 | 6090 | 0.006  | 0.030 |
+| Zigzag | 2152 | 3810 | 0.009  | 0.010 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.013 |
++--------+------+------+--------+-------+
+2025-05-11 19:48:02,000 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 19:48:02,000 - mmrotate - INFO - Epoch(val) [1][4936]	mAP: 0.0134
+2025-05-11 19:54:37,004 - mmrotate - INFO - Epoch [2][50/116]	lr: 5.533e-05, eta: 5:32:41, time: 7.900, data_time: 0.122, memory: 18647, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0001, s0.loss_cls: 0.5355, s0.acc: 99.8443, s0.loss_bbox: 0.0045, s1.loss_cls: 0.0053, s1.acc: 99.8334, s1.loss_bbox: 0.0014, loss: 0.5471, grad_norm: 1.0325
+2025-05-11 20:01:08,186 - mmrotate - INFO - Epoch [2][100/116]	lr: 6.200e-05, eta: 5:32:01, time: 7.824, data_time: 0.069, memory: 18647, loss_rpn_cls: 0.0020, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.2572, s0.acc: 99.7069, s0.loss_bbox: 0.0074, s1.loss_cls: 0.0088, s1.acc: 99.7669, s1.loss_bbox: 0.0034, loss: 0.2788, grad_norm: 1.1929
+2025-05-11 20:03:14,325 - mmrotate - INFO - Saving checkpoint at 2 epochs
+2025-05-11 20:07:56,330 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 631  | 0.116  | 0.067 |
+| FCBK   | 3820 | 6976 | 0.147  | 0.103 |
+| Zigzag | 2152 | 5193 | 0.175  | 0.044 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.071 |
++--------+------+------+--------+-------+
+2025-05-11 20:07:56,417 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 20:07:56,417 - mmrotate - INFO - Epoch(val) [2][4936]	mAP: 0.0715
+2025-05-11 20:14:41,740 - mmrotate - INFO - Epoch [3][50/116]	lr: 7.080e-05, eta: 5:10:46, time: 8.106, data_time: 0.122, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.1036, s0.acc: 99.6310, s0.loss_bbox: 0.0108, s1.loss_cls: 0.0110, s1.acc: 99.6458, s1.loss_bbox: 0.0114, loss: 0.1370, grad_norm: 0.6939
+2025-05-11 20:21:26,132 - mmrotate - INFO - Epoch [3][100/116]	lr: 7.747e-05, eta: 5:11:03, time: 8.088, data_time: 0.070, memory: 18647, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0480, s0.acc: 99.5874, s0.loss_bbox: 0.0119, s1.loss_cls: 0.0124, s1.acc: 99.5915, s1.loss_bbox: 0.0145, loss: 0.0871, grad_norm: 0.4997
+2025-05-11 20:23:36,497 - mmrotate - INFO - Saving checkpoint at 3 epochs
+2025-05-11 20:28:28,628 - mmrotate - INFO - 
++--------+------+-------+--------+-------+
+| class  | gts  | dets  | recall | ap    |
++--------+------+-------+--------+-------+
+| CFCBK  | 580  | 2318  | 0.336  | 0.203 |
+| FCBK   | 3820 | 13098 | 0.273  | 0.131 |
+| Zigzag | 2152 | 8243  | 0.269  | 0.070 |
++--------+------+-------+--------+-------+
+| mAP    |      |       |        | 0.135 |
++--------+------+-------+--------+-------+
+2025-05-11 20:28:28,719 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 20:28:28,719 - mmrotate - INFO - Epoch(val) [3][4936]	mAP: 0.1345
+2025-05-11 20:35:18,306 - mmrotate - INFO - Epoch [4][50/116]	lr: 8.627e-05, eta: 4:55:43, time: 8.191, data_time: 0.130, memory: 18647, loss_rpn_cls: 0.0003, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0272, s0.acc: 99.6797, s0.loss_bbox: 0.0084, s1.loss_cls: 0.0105, s1.acc: 99.6472, s1.loss_bbox: 0.0112, loss: 0.0577, grad_norm: 0.3459
+2025-05-11 20:42:05,468 - mmrotate - INFO - Epoch [4][100/116]	lr: 9.293e-05, eta: 4:54:36, time: 8.143, data_time: 0.076, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0206, s0.acc: 99.6951, s0.loss_bbox: 0.0076, s1.loss_cls: 0.0100, s1.acc: 99.6586, s1.loss_bbox: 0.0109, loss: 0.0493, grad_norm: 0.2755
+2025-05-11 20:44:18,541 - mmrotate - INFO - Saving checkpoint at 4 epochs
+2025-05-11 20:49:07,969 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 1067 | 0.314  | 0.204 |
+| FCBK   | 3820 | 9295 | 0.319  | 0.108 |
+| Zigzag | 2152 | 5597 | 0.299  | 0.103 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.139 |
++--------+------+------+--------+-------+
+2025-05-11 20:49:08,111 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 20:49:08,111 - mmrotate - INFO - Epoch(val) [4][4936]	mAP: 0.1385
+2025-05-11 20:55:46,284 - mmrotate - INFO - Epoch [5][50/116]	lr: 1.000e-04, eta: 4:40:40, time: 7.963, data_time: 0.117, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0100, s0.acc: 99.7933, s0.loss_bbox: 0.0052, s1.loss_cls: 0.0086, s1.acc: 99.7093, s1.loss_bbox: 0.0080, loss: 0.0321, grad_norm: 0.1815
+2025-05-11 21:02:01,784 - mmrotate - INFO - Epoch [5][100/116]	lr: 1.000e-04, eta: 4:36:21, time: 7.510, data_time: 0.068, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0109, s0.acc: 99.7615, s0.loss_bbox: 0.0062, s1.loss_cls: 0.0091, s1.acc: 99.6941, s1.loss_bbox: 0.0087, loss: 0.0351, grad_norm: 0.2038
+2025-05-11 21:04:01,757 - mmrotate - INFO - Saving checkpoint at 5 epochs
+2025-05-11 21:08:39,079 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 1429 | 0.390  | 0.242 |
+| FCBK   | 3820 | 6456 | 0.316  | 0.172 |
+| Zigzag | 2152 | 4837 | 0.341  | 0.172 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.195 |
++--------+------+------+--------+-------+
+2025-05-11 21:08:39,174 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 21:08:39,174 - mmrotate - INFO - Epoch(val) [5][4936]	mAP: 0.1953
+2025-05-11 21:14:48,268 - mmrotate - INFO - Epoch [6][50/116]	lr: 1.000e-04, eta: 4:22:34, time: 7.382, data_time: 0.116, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0130, s0.acc: 99.6913, s0.loss_bbox: 0.0077, s1.loss_cls: 0.0091, s1.acc: 99.6848, s1.loss_bbox: 0.0111, loss: 0.0410, grad_norm: 0.2009
+2025-05-11 21:20:52,570 - mmrotate - INFO - Epoch [6][100/116]	lr: 1.000e-04, eta: 4:17:43, time: 7.286, data_time: 0.071, memory: 18647, loss_rpn_cls: 0.0004, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0103, s0.acc: 99.6894, s0.loss_bbox: 0.0077, s1.loss_cls: 0.0114, s1.acc: 99.6123, s1.loss_bbox: 0.0158, loss: 0.0455, grad_norm: 0.2202
+2025-05-11 21:22:57,610 - mmrotate - INFO - Saving checkpoint at 6 epochs
+2025-05-11 21:27:43,485 - mmrotate - INFO - 
++--------+------+-------+--------+-------+
+| class  | gts  | dets  | recall | ap    |
++--------+------+-------+--------+-------+
+| CFCBK  | 580  | 1116  | 0.436  | 0.290 |
+| FCBK   | 3820 | 14627 | 0.499  | 0.219 |
+| Zigzag | 2152 | 6239  | 0.479  | 0.227 |
++--------+------+-------+--------+-------+
+| mAP    |      |       |        | 0.245 |
++--------+------+-------+--------+-------+
+2025-05-11 21:27:43,582 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 21:27:43,582 - mmrotate - INFO - Epoch(val) [6][4936]	mAP: 0.2454
+2025-05-11 21:34:12,880 - mmrotate - INFO - Epoch [7][50/116]	lr: 1.000e-04, eta: 4:06:40, time: 7.786, data_time: 0.122, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0081, s0.acc: 99.7570, s0.loss_bbox: 0.0060, s1.loss_cls: 0.0097, s1.acc: 99.6710, s1.loss_bbox: 0.0124, loss: 0.0363, grad_norm: 0.1789
+2025-05-11 21:40:45,606 - mmrotate - INFO - Epoch [7][100/116]	lr: 1.000e-04, eta: 4:03:07, time: 7.854, data_time: 0.072, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0102, s0.acc: 99.6889, s0.loss_bbox: 0.0075, s1.loss_cls: 0.0105, s1.acc: 99.6329, s1.loss_bbox: 0.0147, loss: 0.0430, grad_norm: 0.1860
+2025-05-11 21:42:51,563 - mmrotate - INFO - Saving checkpoint at 7 epochs
+2025-05-11 21:47:35,843 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 722  | 0.459  | 0.355 |
+| FCBK   | 3820 | 8386 | 0.578  | 0.326 |
+| Zigzag | 2152 | 6670 | 0.592  | 0.294 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.325 |
++--------+------+------+--------+-------+
+2025-05-11 21:47:35,949 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 21:47:35,949 - mmrotate - INFO - Epoch(val) [7][4936]	mAP: 0.3251
+2025-05-11 21:54:51,248 - mmrotate - INFO - Epoch [8][50/116]	lr: 1.000e-04, eta: 3:54:36, time: 8.706, data_time: 0.121, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0120, s0.acc: 99.6168, s0.loss_bbox: 0.0089, s1.loss_cls: 0.0122, s1.acc: 99.5696, s1.loss_bbox: 0.0189, loss: 0.0522, grad_norm: 0.2153
+2025-05-11 22:01:33,818 - mmrotate - INFO - Epoch [8][100/116]	lr: 1.000e-04, eta: 3:50:56, time: 8.051, data_time: 0.072, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0105, s0.acc: 99.6581, s0.loss_bbox: 0.0072, s1.loss_cls: 0.0117, s1.acc: 99.5858, s1.loss_bbox: 0.0181, loss: 0.0476, grad_norm: 0.2047
+2025-05-11 22:03:38,457 - mmrotate - INFO - Saving checkpoint at 8 epochs
+2025-05-11 22:08:56,784 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 342  | 0.388  | 0.311 |
+| FCBK   | 3820 | 7838 | 0.603  | 0.351 |
+| Zigzag | 2152 | 4311 | 0.542  | 0.322 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.328 |
++--------+------+------+--------+-------+
+2025-05-11 22:08:56,869 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 22:08:56,869 - mmrotate - INFO - Epoch(val) [8][4936]	mAP: 0.3280
+2025-05-11 22:17:50,101 - mmrotate - INFO - Epoch [9][50/116]	lr: 1.000e-05, eta: 3:45:40, time: 10.664, data_time: 0.127, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0063, s0.acc: 99.8097, s0.loss_bbox: 0.0036, s1.loss_cls: 0.0095, s1.acc: 99.6655, s1.loss_bbox: 0.0131, loss: 0.0326, grad_norm: 0.1212
+2025-05-11 22:26:42,199 - mmrotate - INFO - Epoch [9][100/116]	lr: 1.000e-05, eta: 3:45:15, time: 10.642, data_time: 0.068, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0066, s0.acc: 99.7986, s0.loss_bbox: 0.0038, s1.loss_cls: 0.0096, s1.acc: 99.6580, s1.loss_bbox: 0.0137, loss: 0.0338, grad_norm: 0.1176
+2025-05-11 22:29:13,689 - mmrotate - INFO - Saving checkpoint at 9 epochs
+2025-05-11 22:34:19,742 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 398  | 0.431  | 0.366 |
+| FCBK   | 3820 | 7518 | 0.629  | 0.388 |
+| Zigzag | 2152 | 4499 | 0.582  | 0.340 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.365 |
++--------+------+------+--------+-------+
+2025-05-11 22:34:19,824 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 22:34:19,824 - mmrotate - INFO - Epoch(val) [9][4936]	mAP: 0.3648
+2025-05-11 22:41:00,580 - mmrotate - INFO - Epoch [10][50/116]	lr: 1.000e-05, eta: 3:35:13, time: 8.015, data_time: 0.120, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0075, s0.acc: 99.7668, s0.loss_bbox: 0.0046, s1.loss_cls: 0.0102, s1.acc: 99.6391, s1.loss_bbox: 0.0146, loss: 0.0370, grad_norm: 0.1382
+2025-05-11 22:47:27,485 - mmrotate - INFO - Epoch [10][100/116]	lr: 1.000e-05, eta: 3:30:01, time: 7.738, data_time: 0.070, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0073, s0.acc: 99.7728, s0.loss_bbox: 0.0044, s1.loss_cls: 0.0100, s1.acc: 99.6485, s1.loss_bbox: 0.0144, loss: 0.0362, grad_norm: 0.1455
+2025-05-11 22:50:07,926 - mmrotate - INFO - Saving checkpoint at 10 epochs
+2025-05-11 22:55:31,927 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 459  | 0.455  | 0.361 |
+| FCBK   | 3820 | 7704 | 0.615  | 0.372 |
+| Zigzag | 2152 | 4675 | 0.584  | 0.332 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.355 |
++--------+------+------+--------+-------+
+2025-05-11 22:55:32,020 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 22:55:32,020 - mmrotate - INFO - Epoch(val) [10][4936]	mAP: 0.3550
+2025-05-11 23:03:54,194 - mmrotate - INFO - Epoch [11][50/116]	lr: 1.000e-05, eta: 3:22:47, time: 10.043, data_time: 0.121, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0077, s0.acc: 99.7544, s0.loss_bbox: 0.0049, s1.loss_cls: 0.0102, s1.acc: 99.6378, s1.loss_bbox: 0.0149, loss: 0.0378, grad_norm: 0.1348
+2025-05-11 23:11:40,880 - mmrotate - INFO - Epoch [11][100/116]	lr: 1.000e-05, eta: 3:19:06, time: 9.334, data_time: 0.069, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0073, s0.acc: 99.7665, s0.loss_bbox: 0.0045, s1.loss_cls: 0.0103, s1.acc: 99.6351, s1.loss_bbox: 0.0144, loss: 0.0366, grad_norm: 0.1430
+2025-05-11 23:14:42,112 - mmrotate - INFO - Saving checkpoint at 11 epochs
+2025-05-11 23:20:41,010 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 426  | 0.438  | 0.369 |
+| FCBK   | 3820 | 7247 | 0.634  | 0.384 |
+| Zigzag | 2152 | 4894 | 0.629  | 0.368 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.374 |
++--------+------+------+--------+-------+
+2025-05-11 23:20:41,113 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 23:20:41,113 - mmrotate - INFO - Epoch(val) [11][4936]	mAP: 0.3737
+2025-05-11 23:29:08,010 - mmrotate - INFO - Epoch [12][50/116]	lr: 1.000e-06, eta: 3:11:36, time: 10.138, data_time: 0.134, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0080, s0.acc: 99.7395, s0.loss_bbox: 0.0053, s1.loss_cls: 0.0112, s1.acc: 99.6006, s1.loss_bbox: 0.0167, loss: 0.0413, grad_norm: 0.1499
+2025-05-11 23:37:16,579 - mmrotate - INFO - Epoch [12][100/116]	lr: 1.000e-06, eta: 3:07:48, time: 9.771, data_time: 0.076, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0078, s0.acc: 99.7459, s0.loss_bbox: 0.0050, s1.loss_cls: 0.0109, s1.acc: 99.6135, s1.loss_bbox: 0.0162, loss: 0.0401, grad_norm: 0.1437
+2025-05-11 23:39:35,533 - mmrotate - INFO - Saving checkpoint at 12 epochs
+2025-05-11 23:43:38,412 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 439  | 0.443  | 0.368 |
+| FCBK   | 3820 | 7961 | 0.632  | 0.375 |
+| Zigzag | 2152 | 4993 | 0.632  | 0.373 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.372 |
++--------+------+------+--------+-------+
+2025-05-11 23:43:38,510 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 23:43:38,510 - mmrotate - INFO - Epoch(val) [12][4936]	mAP: 0.3722
+2025-05-11 23:46:22,773 - mmrotate - INFO - Epoch [13][50/116]	lr: 1.000e-06, eta: 2:54:12, time: 3.285, data_time: 0.124, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0082, s0.acc: 99.7320, s0.loss_bbox: 0.0051, s1.loss_cls: 0.0112, s1.acc: 99.6018, s1.loss_bbox: 0.0166, loss: 0.0413, grad_norm: 0.1519
+2025-05-11 23:49:03,123 - mmrotate - INFO - Epoch [13][100/116]	lr: 1.000e-06, eta: 2:45:07, time: 3.207, data_time: 0.069, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0079, s0.acc: 99.7413, s0.loss_bbox: 0.0051, s1.loss_cls: 0.0109, s1.acc: 99.6095, s1.loss_bbox: 0.0165, loss: 0.0406, grad_norm: 0.1390
+2025-05-11 23:49:53,300 - mmrotate - INFO - Saving checkpoint at 13 epochs
+2025-05-11 23:52:39,905 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 449  | 0.453  | 0.371 |
+| FCBK   | 3820 | 7929 | 0.646  | 0.383 |
+| Zigzag | 2152 | 4892 | 0.628  | 0.377 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.377 |
++--------+------+------+--------+-------+
+2025-05-11 23:52:40,006 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-11 23:52:40,006 - mmrotate - INFO - Epoch(val) [13][4936]	mAP: 0.3769
+2025-05-11 23:55:05,079 - mmrotate - INFO - Epoch [14][50/116]	lr: 1.000e-06, eta: 2:32:47, time: 2.901, data_time: 0.128, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0085, s0.acc: 99.7202, s0.loss_bbox: 0.0056, s1.loss_cls: 0.0114, s1.acc: 99.5907, s1.loss_bbox: 0.0173, loss: 0.0429, grad_norm: 0.1488
+2025-05-11 23:57:46,841 - mmrotate - INFO - Epoch [14][100/116]	lr: 1.000e-06, eta: 2:24:41, time: 3.235, data_time: 0.077, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0087, s0.acc: 99.7122, s0.loss_bbox: 0.0058, s1.loss_cls: 0.0115, s1.acc: 99.5894, s1.loss_bbox: 0.0172, loss: 0.0435, grad_norm: 0.1552
+2025-05-11 23:58:20,094 - mmrotate - INFO - Saving checkpoint at 14 epochs
+2025-05-12 00:00:27,772 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 470  | 0.466  | 0.373 |
+| FCBK   | 3820 | 7946 | 0.647  | 0.396 |
+| Zigzag | 2152 | 5061 | 0.642  | 0.383 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.384 |
++--------+------+------+--------+-------+
+2025-05-12 00:00:27,873 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:00:27,874 - mmrotate - INFO - Epoch(val) [14][4936]	mAP: 0.3839
+2025-05-12 00:02:01,357 - mmrotate - INFO - Epoch [15][50/116]	lr: 1.000e-06, eta: 2:13:01, time: 1.869, data_time: 0.124, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0084, s0.acc: 99.7185, s0.loss_bbox: 0.0056, s1.loss_cls: 0.0114, s1.acc: 99.5892, s1.loss_bbox: 0.0177, loss: 0.0432, grad_norm: 0.1494
+2025-05-12 00:03:32,484 - mmrotate - INFO - Epoch [15][100/116]	lr: 1.000e-06, eta: 2:04:56, time: 1.823, data_time: 0.074, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0088, s0.acc: 99.7103, s0.loss_bbox: 0.0060, s1.loss_cls: 0.0119, s1.acc: 99.5790, s1.loss_bbox: 0.0179, loss: 0.0447, grad_norm: 0.1582
+2025-05-12 00:04:01,620 - mmrotate - INFO - Saving checkpoint at 15 epochs
+2025-05-12 00:06:10,872 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 466  | 0.469  | 0.381 |
+| FCBK   | 3820 | 7949 | 0.656  | 0.402 |
+| Zigzag | 2152 | 5081 | 0.649  | 0.386 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.390 |
++--------+------+------+--------+-------+
+2025-05-12 00:06:10,964 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:06:10,965 - mmrotate - INFO - Epoch(val) [15][4936]	mAP: 0.3897
+2025-05-12 00:07:45,159 - mmrotate - INFO - Epoch [16][50/116]	lr: 1.000e-06, eta: 1:54:33, time: 1.884, data_time: 0.126, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0089, s0.acc: 99.7015, s0.loss_bbox: 0.0059, s1.loss_cls: 0.0118, s1.acc: 99.5739, s1.loss_bbox: 0.0184, loss: 0.0453, grad_norm: 0.1577
+2025-05-12 00:09:16,677 - mmrotate - INFO - Epoch [16][100/116]	lr: 1.000e-06, eta: 1:47:18, time: 1.830, data_time: 0.073, memory: 18647, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0089, s0.acc: 99.7009, s0.loss_bbox: 0.0062, s1.loss_cls: 0.0118, s1.acc: 99.5764, s1.loss_bbox: 0.0180, loss: 0.0450, grad_norm: 0.1563
+2025-05-12 00:09:45,887 - mmrotate - INFO - Saving checkpoint at 16 epochs
+2025-05-12 00:11:53,022 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 491  | 0.495  | 0.384 |
+| FCBK   | 3820 | 8326 | 0.658  | 0.389 |
+| Zigzag | 2152 | 5362 | 0.665  | 0.391 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.388 |
++--------+------+------+--------+-------+
+2025-05-12 00:11:53,120 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:11:53,121 - mmrotate - INFO - Epoch(val) [16][4936]	mAP: 0.3881
+2025-05-12 00:13:26,943 - mmrotate - INFO - Epoch [17][50/116]	lr: 1.000e-06, eta: 1:37:57, time: 1.876, data_time: 0.124, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0093, s0.acc: 99.6866, s0.loss_bbox: 0.0063, s1.loss_cls: 0.0123, s1.acc: 99.5569, s1.loss_bbox: 0.0191, loss: 0.0472, grad_norm: 0.1681
+2025-05-12 00:14:58,055 - mmrotate - INFO - Epoch [17][100/116]	lr: 1.000e-06, eta: 1:31:22, time: 1.822, data_time: 0.068, memory: 18647, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0090, s0.acc: 99.6971, s0.loss_bbox: 0.0063, s1.loss_cls: 0.0122, s1.acc: 99.5613, s1.loss_bbox: 0.0188, loss: 0.0463, grad_norm: 0.1603
+2025-05-12 00:15:27,283 - mmrotate - INFO - Saving checkpoint at 17 epochs
+2025-05-12 00:17:35,375 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 506  | 0.497  | 0.388 |
+| FCBK   | 3820 | 8198 | 0.665  | 0.409 |
+| Zigzag | 2152 | 5313 | 0.664  | 0.391 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.396 |
++--------+------+------+--------+-------+
+2025-05-12 00:17:35,473 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:17:35,474 - mmrotate - INFO - Epoch(val) [17][4936]	mAP: 0.3960
+2025-05-12 00:19:08,922 - mmrotate - INFO - Epoch [18][50/116]	lr: 1.000e-06, eta: 1:22:53, time: 1.869, data_time: 0.124, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0089, s0.acc: 99.6992, s0.loss_bbox: 0.0061, s1.loss_cls: 0.0121, s1.acc: 99.5593, s1.loss_bbox: 0.0192, loss: 0.0464, grad_norm: 0.1631
+2025-05-12 00:20:40,448 - mmrotate - INFO - Epoch [18][100/116]	lr: 1.000e-06, eta: 1:16:53, time: 1.831, data_time: 0.075, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0092, s0.acc: 99.6865, s0.loss_bbox: 0.0063, s1.loss_cls: 0.0125, s1.acc: 99.5489, s1.loss_bbox: 0.0194, loss: 0.0476, grad_norm: 0.1689
+2025-05-12 00:21:09,858 - mmrotate - INFO - Saving checkpoint at 18 epochs
+2025-05-12 00:23:18,667 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 532  | 0.519  | 0.445 |
+| FCBK   | 3820 | 8957 | 0.677  | 0.412 |
+| Zigzag | 2152 | 5663 | 0.678  | 0.395 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.417 |
++--------+------+------+--------+-------+
+2025-05-12 00:23:18,777 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:23:18,778 - mmrotate - INFO - Epoch(val) [18][4936]	mAP: 0.4172
+2025-05-12 00:24:52,951 - mmrotate - INFO - Epoch [19][50/116]	lr: 1.000e-06, eta: 1:09:08, time: 1.883, data_time: 0.125, memory: 18647, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0092, s0.acc: 99.6873, s0.loss_bbox: 0.0065, s1.loss_cls: 0.0125, s1.acc: 99.5457, s1.loss_bbox: 0.0200, loss: 0.0483, grad_norm: 0.1782
+2025-05-12 00:26:24,494 - mmrotate - INFO - Epoch [19][100/116]	lr: 1.000e-06, eta: 1:03:37, time: 1.831, data_time: 0.070, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0094, s0.acc: 99.6798, s0.loss_bbox: 0.0066, s1.loss_cls: 0.0125, s1.acc: 99.5513, s1.loss_bbox: 0.0192, loss: 0.0479, grad_norm: 0.1675
+2025-05-12 00:26:53,776 - mmrotate - INFO - Saving checkpoint at 19 epochs
+2025-05-12 00:29:03,514 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 522  | 0.509  | 0.449 |
+| FCBK   | 3820 | 8288 | 0.675  | 0.415 |
+| Zigzag | 2152 | 5557 | 0.675  | 0.396 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.420 |
++--------+------+------+--------+-------+
+2025-05-12 00:29:03,602 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:29:03,602 - mmrotate - INFO - Epoch(val) [19][4936]	mAP: 0.4201
+2025-05-12 00:30:37,216 - mmrotate - INFO - Epoch [20][50/116]	lr: 1.000e-06, eta: 0:56:28, time: 1.872, data_time: 0.123, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0094, s0.acc: 99.6766, s0.loss_bbox: 0.0067, s1.loss_cls: 0.0126, s1.acc: 99.5456, s1.loss_bbox: 0.0200, loss: 0.0489, grad_norm: 0.1729
+2025-05-12 00:32:08,668 - mmrotate - INFO - Epoch [20][100/116]	lr: 1.000e-06, eta: 0:51:22, time: 1.829, data_time: 0.075, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0094, s0.acc: 99.6769, s0.loss_bbox: 0.0064, s1.loss_cls: 0.0125, s1.acc: 99.5494, s1.loss_bbox: 0.0197, loss: 0.0481, grad_norm: 0.1695
+2025-05-12 00:32:38,287 - mmrotate - INFO - Saving checkpoint at 20 epochs
+2025-05-12 00:34:47,290 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 543  | 0.505  | 0.439 |
+| FCBK   | 3820 | 8209 | 0.675  | 0.412 |
+| Zigzag | 2152 | 5542 | 0.680  | 0.400 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.417 |
++--------+------+------+--------+-------+
+2025-05-12 00:34:47,385 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:34:47,385 - mmrotate - INFO - Epoch(val) [20][4936]	mAP: 0.4169
+2025-05-12 00:36:21,078 - mmrotate - INFO - Epoch [21][50/116]	lr: 1.000e-06, eta: 0:44:45, time: 1.874, data_time: 0.124, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0096, s0.acc: 99.6673, s0.loss_bbox: 0.0069, s1.loss_cls: 0.0129, s1.acc: 99.5331, s1.loss_bbox: 0.0202, loss: 0.0498, grad_norm: 0.1737
+2025-05-12 00:37:52,320 - mmrotate - INFO - Epoch [21][100/116]	lr: 1.000e-06, eta: 0:40:00, time: 1.825, data_time: 0.072, memory: 18647, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0097, s0.acc: 99.6658, s0.loss_bbox: 0.0068, s1.loss_cls: 0.0127, s1.acc: 99.5356, s1.loss_bbox: 0.0208, loss: 0.0501, grad_norm: 0.1732
+2025-05-12 00:38:21,717 - mmrotate - INFO - Saving checkpoint at 21 epochs
+2025-05-12 00:40:30,267 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 552  | 0.519  | 0.452 |
+| FCBK   | 3820 | 8448 | 0.674  | 0.390 |
+| Zigzag | 2152 | 5478 | 0.678  | 0.396 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.413 |
++--------+------+------+--------+-------+
+2025-05-12 00:40:30,356 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:40:30,356 - mmrotate - INFO - Epoch(val) [21][4936]	mAP: 0.4129
+2025-05-12 00:42:04,486 - mmrotate - INFO - Epoch [22][50/116]	lr: 1.000e-06, eta: 0:33:50, time: 1.882, data_time: 0.131, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0098, s0.acc: 99.6635, s0.loss_bbox: 0.0069, s1.loss_cls: 0.0129, s1.acc: 99.5313, s1.loss_bbox: 0.0206, loss: 0.0503, grad_norm: 0.1791
+2025-05-12 00:43:35,857 - mmrotate - INFO - Epoch [22][100/116]	lr: 1.000e-06, eta: 0:29:23, time: 1.827, data_time: 0.075, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0097, s0.acc: 99.6641, s0.loss_bbox: 0.0068, s1.loss_cls: 0.0130, s1.acc: 99.5314, s1.loss_bbox: 0.0205, loss: 0.0501, grad_norm: 0.1743
+2025-05-12 00:44:05,210 - mmrotate - INFO - Saving checkpoint at 22 epochs
+2025-05-12 00:46:11,374 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 548  | 0.516  | 0.455 |
+| FCBK   | 3820 | 8611 | 0.679  | 0.398 |
+| Zigzag | 2152 | 5596 | 0.680  | 0.399 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.417 |
++--------+------+------+--------+-------+
+2025-05-12 00:46:11,470 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:46:11,470 - mmrotate - INFO - Epoch(val) [22][4936]	mAP: 0.4173
+2025-05-12 00:47:44,981 - mmrotate - INFO - Epoch [23][50/116]	lr: 1.000e-06, eta: 0:23:37, time: 1.870, data_time: 0.120, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0097, s0.acc: 99.6652, s0.loss_bbox: 0.0068, s1.loss_cls: 0.0127, s1.acc: 99.5413, s1.loss_bbox: 0.0203, loss: 0.0497, grad_norm: 0.1742
+2025-05-12 00:49:15,993 - mmrotate - INFO - Epoch [23][100/116]	lr: 1.000e-06, eta: 0:19:26, time: 1.820, data_time: 0.069, memory: 18647, loss_rpn_cls: 0.0001, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0101, s0.acc: 99.6541, s0.loss_bbox: 0.0070, s1.loss_cls: 0.0131, s1.acc: 99.5245, s1.loss_bbox: 0.0212, loss: 0.0515, grad_norm: 0.1817
+2025-05-12 00:49:45,019 - mmrotate - INFO - Saving checkpoint at 23 epochs
+2025-05-12 00:51:51,975 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 565  | 0.531  | 0.458 |
+| FCBK   | 3820 | 8617 | 0.681  | 0.396 |
+| Zigzag | 2152 | 5472 | 0.682  | 0.399 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.418 |
++--------+------+------+--------+-------+
+2025-05-12 00:51:52,087 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:51:52,087 - mmrotate - INFO - Epoch(val) [23][4936]	mAP: 0.4179
+2025-05-12 00:53:25,447 - mmrotate - INFO - Epoch [24][50/116]	lr: 1.000e-06, eta: 0:14:01, time: 1.867, data_time: 0.119, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0101, s0.acc: 99.6498, s0.loss_bbox: 0.0071, s1.loss_cls: 0.0132, s1.acc: 99.5202, s1.loss_bbox: 0.0214, loss: 0.0520, grad_norm: 0.1833
+2025-05-12 00:54:56,336 - mmrotate - INFO - Epoch [24][100/116]	lr: 1.000e-06, eta: 0:10:03, time: 1.818, data_time: 0.072, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0098, s0.acc: 99.6607, s0.loss_bbox: 0.0070, s1.loss_cls: 0.0129, s1.acc: 99.5261, s1.loss_bbox: 0.0206, loss: 0.0504, grad_norm: 0.1737
+2025-05-12 00:55:25,484 - mmrotate - INFO - Saving checkpoint at 24 epochs
+2025-05-12 00:57:35,688 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 562  | 0.531  | 0.455 |
+| FCBK   | 3820 | 8780 | 0.686  | 0.409 |
+| Zigzag | 2152 | 5683 | 0.685  | 0.392 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.419 |
++--------+------+------+--------+-------+
+2025-05-12 00:57:35,782 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 00:57:35,782 - mmrotate - INFO - Epoch(val) [24][4936]	mAP: 0.4186
+2025-05-12 00:59:10,074 - mmrotate - INFO - Epoch [25][50/116]	lr: 1.000e-06, eta: 0:04:56, time: 1.886, data_time: 0.131, memory: 18647, loss_rpn_cls: 0.0002, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0103, s0.acc: 99.6432, s0.loss_bbox: 0.0072, s1.loss_cls: 0.0132, s1.acc: 99.5206, s1.loss_bbox: 0.0213, loss: 0.0521, grad_norm: 0.1820
+2025-05-12 01:00:41,448 - mmrotate - INFO - Epoch [25][100/116]	lr: 1.000e-06, eta: 0:01:11, time: 1.827, data_time: 0.074, memory: 18647, loss_rpn_cls: 0.0000, loss_rpn_bbox: 0.0000, s0.loss_cls: 0.0100, s0.acc: 99.6548, s0.loss_bbox: 0.0072, s1.loss_cls: 0.0130, s1.acc: 99.5291, s1.loss_bbox: 0.0209, loss: 0.0512, grad_norm: 0.1772
+2025-05-12 01:01:10,648 - mmrotate - INFO - Saving checkpoint at 25 epochs
+2025-05-12 01:03:18,834 - mmrotate - INFO - 
++--------+------+------+--------+-------+
+| class  | gts  | dets | recall | ap    |
++--------+------+------+--------+-------+
+| CFCBK  | 580  | 570  | 0.540  | 0.464 |
+| FCBK   | 3820 | 8400 | 0.690  | 0.411 |
+| Zigzag | 2152 | 5632 | 0.692  | 0.402 |
++--------+------+------+--------+-------+
+| mAP    |      |      |        | 0.426 |
++--------+------+------+--------+-------+
+2025-05-12 01:03:18,939 - mmrotate - INFO - Exp name: roi_trans_swin_tiny_fpn_1x_up_le90.py
+2025-05-12 01:03:18,940 - mmrotate - INFO - Epoch(val) [25][4936]	mAP: 0.4258

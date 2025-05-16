@@ -1,0 +1,637 @@
+2025-05-09 00:30:01,904 - mmrotate - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.20 | packaged by conda-forge | (default, Sep 30 2024, 17:52:49) [GCC 13.3.0]
+CUDA available: True
+GPU 0: NVIDIA A100-SXM4-80GB
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 10.1, V10.1.24
+GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0
+PyTorch: 1.9.0+cu111
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.1.2 (Git Hash 98be7e8afa711dc9b66c8ff3504129cb82013cdb)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.1
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.1, CUDNN_VERSION=8.0.5, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.9.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.10.0+cu111
+OpenCV: 4.11.0
+MMCV: 1.7.2
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.1
+MMRotate: 0.3.4+b030f38
+------------------------------------------------------------
+
+2025-05-09 00:30:03,131 - mmrotate - INFO - Distributed training: True
+2025-05-09 00:30:04,322 - mmrotate - INFO - Config:
+dataset_type = 'BrickKilnDataset'
+data_root = '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='RResize', img_scale=(128, 128)),
+    dict(
+        type='RRandomFlip',
+        flip_ratio=[0.25, 0.25, 0.25],
+        direction=['horizontal', 'vertical', 'diagonal'],
+        version='oc'),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(128, 128),
+        flip=False,
+        transforms=[
+            dict(type='RResize'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=1218,
+    workers_per_gpu=2,
+    train=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/train/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='RResize', img_scale=(128, 128)),
+            dict(
+                type='RRandomFlip',
+                flip_ratio=[0.25, 0.25, 0.25],
+                direction=['horizontal', 'vertical', 'diagonal'],
+                version='oc'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ],
+        version='oc'),
+    val=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/annfiles/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/val/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='oc'),
+    test=dict(
+        type='BrickKilnDataset',
+        ann_file=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        img_prefix=
+        '/home/shardul.junagade/my-work/domain-adaptation-brick-kilns/data/stratified_split/test/images/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(128, 128),
+                flip=False,
+                transforms=[
+                    dict(type='RResize'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='DefaultFormatBundle'),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        version='oc'))
+evaluation = dict(interval=1, metric='mAP')
+optimizer = dict(type='SGD', lr=0.0025, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.3333333333333333,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=25)
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+angle_version = 'oc'
+model = dict(
+    type='R3Det',
+    backbone=dict(
+        type='ResNet',
+        depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        zero_init_residual=False,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        norm_eval=True,
+        style='pytorch',
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
+    neck=dict(
+        type='FPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        start_level=1,
+        add_extra_convs='on_input',
+        num_outs=5),
+    bbox_head=dict(
+        type='RotatedRetinaHead',
+        num_classes=3,
+        in_channels=256,
+        stacked_convs=4,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='RotatedAnchorGenerator',
+            octave_base_scale=4,
+            scales_per_octave=3,
+            ratios=[1.0, 0.5, 2.0],
+            strides=[8, 16, 32, 64, 128]),
+        bbox_coder=dict(
+            type='DeltaXYWHAOBBoxCoder',
+            angle_range='oc',
+            norm_factor=None,
+            edge_swap=False,
+            proj_xy=False,
+            target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+            target_stds=(1.0, 1.0, 1.0, 1.0, 1.0)),
+        loss_cls=dict(
+            type='FocalLoss',
+            use_sigmoid=True,
+            gamma=2.0,
+            alpha=0.25,
+            loss_weight=1.0),
+        loss_bbox=dict(type='SmoothL1Loss', beta=0.11, loss_weight=1.0)),
+    frm_cfgs=[dict(in_channels=256, featmap_strides=[8, 16, 32, 64, 128])],
+    num_refine_stages=1,
+    refine_heads=[
+        dict(
+            type='RotatedRetinaRefineHead',
+            num_classes=3,
+            in_channels=256,
+            stacked_convs=4,
+            feat_channels=256,
+            assign_by_circumhbbox=None,
+            anchor_generator=dict(
+                type='PseudoAnchorGenerator', strides=[8, 16, 32, 64, 128]),
+            bbox_coder=dict(
+                type='DeltaXYWHAOBBoxCoder',
+                angle_range='oc',
+                norm_factor=None,
+                edge_swap=False,
+                proj_xy=False,
+                target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+                target_stds=(1.0, 1.0, 1.0, 1.0, 1.0)),
+            loss_cls=dict(
+                type='FocalLoss',
+                use_sigmoid=True,
+                gamma=2.0,
+                alpha=0.25,
+                loss_weight=1.0),
+            loss_bbox=dict(type='SmoothL1Loss', beta=0.11, loss_weight=1.0))
+    ],
+    train_cfg=dict(
+        s0=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.4,
+                min_pos_iou=0,
+                ignore_iof_thr=-1,
+                iou_calculator=dict(type='RBboxOverlaps2D')),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        sr=[
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.6,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0,
+                    ignore_iof_thr=-1,
+                    iou_calculator=dict(type='RBboxOverlaps2D')),
+                allowed_border=-1,
+                pos_weight=-1,
+                debug=False)
+        ],
+        stage_loss_weights=[1.0]),
+    test_cfg=dict(
+        nms_pre=2000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        nms=dict(iou_thr=0.1),
+        max_per_img=2000))
+batch_size = 1218
+num_epochs = 25
+work_dir = './work_dirs/r3det_r50_fpn_1x_brickkiln_oc'
+auto_resume = False
+gpu_ids = range(0, 1)
+
+2025-05-09 00:30:04,328 - mmrotate - INFO - Set random seed to 0, deterministic: False
+2025-05-09 00:30:30,066 - mmrotate - INFO - Start running, host: shardul.junagade@ramanujan, work_dir: /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/r3det_r50_fpn_1x_brickkiln_oc
+2025-05-09 00:30:30,072 - mmrotate - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2025-05-09 00:30:30,073 - mmrotate - INFO - workflow: [('train', 1)], max: 25 epochs
+2025-05-09 00:30:30,073 - mmrotate - INFO - Checkpoints will be saved to /home/shardul.junagade/my-work/domain-adaptation-brick-kilns/mmrotate/work_dirs/r3det_r50_fpn_1x_brickkiln_oc by HardDiskBackend.
+2025-05-09 00:51:19,252 - mmrotate - INFO - Saving checkpoint at 1 epochs
+2025-05-09 01:05:33,518 - mmrotate - INFO - 
++--------+-------+------+--------+-------+
+| class  | gts   | dets | recall | ap    |
++--------+-------+------+--------+-------+
+| CFCBK  | 649   | 0    | 0.000  | 0.000 |
+| FCBK   | 11134 | 0    | 0.000  | 0.000 |
+| Zigzag | 9050  | 0    | 0.000  | 0.000 |
++--------+-------+------+--------+-------+
+| mAP    |       |      |        | 0.000 |
++--------+-------+------+--------+-------+
+2025-05-09 01:05:33,684 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 01:05:33,699 - mmrotate - INFO - Epoch(val) [1][15590]	mAP: 0.0000
+2025-05-09 01:25:33,792 - mmrotate - INFO - Saving checkpoint at 2 epochs
+2025-05-09 01:41:07,106 - mmrotate - INFO - 
++--------+-------+---------+--------+-------+
+| class  | gts   | dets    | recall | ap    |
++--------+-------+---------+--------+-------+
+| CFCBK  | 649   | 0       | 0.000  | 0.000 |
+| FCBK   | 11134 | 1614256 | 0.016  | 0.000 |
+| Zigzag | 9050  | 2340691 | 0.027  | 0.000 |
++--------+-------+---------+--------+-------+
+| mAP    |       |         |        | 0.000 |
++--------+-------+---------+--------+-------+
+2025-05-09 01:41:07,273 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 01:41:07,292 - mmrotate - INFO - Epoch(val) [2][15590]	mAP: 0.0000
+2025-05-09 02:03:09,518 - mmrotate - INFO - Saving checkpoint at 3 epochs
+2025-05-09 02:18:52,301 - mmrotate - INFO - 
++--------+-------+---------+--------+-------+
+| class  | gts   | dets    | recall | ap    |
++--------+-------+---------+--------+-------+
+| CFCBK  | 649   | 0       | 0.000  | 0.000 |
+| FCBK   | 11134 | 1702311 | 0.033  | 0.000 |
+| Zigzag | 9050  | 1674006 | 0.038  | 0.000 |
++--------+-------+---------+--------+-------+
+| mAP    |       |         |        | 0.000 |
++--------+-------+---------+--------+-------+
+2025-05-09 02:18:52,543 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 02:18:52,552 - mmrotate - INFO - Epoch(val) [3][15590]	mAP: 0.0001
+2025-05-09 02:40:24,671 - mmrotate - INFO - Saving checkpoint at 4 epochs
+2025-05-09 02:55:19,340 - mmrotate - INFO - 
++--------+-------+---------+--------+-------+
+| class  | gts   | dets    | recall | ap    |
++--------+-------+---------+--------+-------+
+| CFCBK  | 649   | 14723   | 0.003  | 0.000 |
+| FCBK   | 11134 | 1779143 | 0.060  | 0.000 |
+| Zigzag | 9050  | 1617120 | 0.069  | 0.000 |
++--------+-------+---------+--------+-------+
+| mAP    |       |         |        | 0.000 |
++--------+-------+---------+--------+-------+
+2025-05-09 02:55:19,565 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 02:55:19,569 - mmrotate - INFO - Epoch(val) [4][15590]	mAP: 0.0002
+2025-05-09 03:14:46,596 - mmrotate - INFO - Saving checkpoint at 5 epochs
+2025-05-09 03:28:47,638 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 49274  | 0.059  | 0.000 |
+| FCBK   | 11134 | 904199 | 0.059  | 0.000 |
+| Zigzag | 9050  | 795257 | 0.069  | 0.001 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.001 |
++--------+-------+--------+--------+-------+
+2025-05-09 03:28:47,800 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 03:28:47,803 - mmrotate - INFO - Epoch(val) [5][15590]	mAP: 0.0006
+2025-05-09 03:49:13,066 - mmrotate - INFO - Saving checkpoint at 6 epochs
+2025-05-09 04:03:35,205 - mmrotate - INFO - 
++--------+-------+-------+--------+-------+
+| class  | gts   | dets  | recall | ap    |
++--------+-------+-------+--------+-------+
+| CFCBK  | 649   | 61    | 0.000  | 0.000 |
+| FCBK   | 11134 | 56445 | 0.024  | 0.003 |
+| Zigzag | 9050  | 56688 | 0.038  | 0.006 |
++--------+-------+-------+--------+-------+
+| mAP    |       |       |        | 0.003 |
++--------+-------+-------+--------+-------+
+2025-05-09 04:03:35,382 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 04:03:35,386 - mmrotate - INFO - Epoch(val) [6][15590]	mAP: 0.0030
+2025-05-09 04:23:27,422 - mmrotate - INFO - Saving checkpoint at 7 epochs
+2025-05-09 04:37:51,917 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 32253  | 0.022  | 0.001 |
+| FCBK   | 11134 | 625517 | 0.040  | 0.000 |
+| Zigzag | 9050  | 497093 | 0.052  | 0.001 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.001 |
++--------+-------+--------+--------+-------+
+2025-05-09 04:37:52,126 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 04:37:52,198 - mmrotate - INFO - Epoch(val) [7][15590]	mAP: 0.0006
+2025-05-09 04:56:38,583 - mmrotate - INFO - Saving checkpoint at 8 epochs
+2025-05-09 05:11:00,887 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 8406   | 0.006  | 0.000 |
+| FCBK   | 11134 | 388911 | 0.062  | 0.001 |
+| Zigzag | 9050  | 336180 | 0.084  | 0.005 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.002 |
++--------+-------+--------+--------+-------+
+2025-05-09 05:11:01,096 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 05:11:01,099 - mmrotate - INFO - Epoch(val) [8][15590]	mAP: 0.0022
+2025-05-09 05:29:24,625 - mmrotate - INFO - Saving checkpoint at 9 epochs
+2025-05-09 05:43:38,632 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 46245  | 0.092  | 0.000 |
+| FCBK   | 11134 | 776329 | 0.082  | 0.001 |
+| Zigzag | 9050  | 592976 | 0.100  | 0.005 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.002 |
++--------+-------+--------+--------+-------+
+2025-05-09 05:43:38,741 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 05:43:38,745 - mmrotate - INFO - Epoch(val) [9][15590]	mAP: 0.0021
+2025-05-09 06:03:53,885 - mmrotate - INFO - Saving checkpoint at 10 epochs
+2025-05-09 06:18:15,580 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 49774  | 0.103  | 0.001 |
+| FCBK   | 11134 | 806483 | 0.083  | 0.002 |
+| Zigzag | 9050  | 595311 | 0.104  | 0.008 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 06:18:15,715 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 06:18:15,723 - mmrotate - INFO - Epoch(val) [10][15590]	mAP: 0.0034
+2025-05-09 06:37:49,966 - mmrotate - INFO - Saving checkpoint at 11 epochs
+2025-05-09 06:54:25,825 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48133  | 0.120  | 0.001 |
+| FCBK   | 11134 | 787128 | 0.084  | 0.002 |
+| Zigzag | 9050  | 565696 | 0.109  | 0.010 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.004 |
++--------+-------+--------+--------+-------+
+2025-05-09 06:54:25,992 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 06:54:25,996 - mmrotate - INFO - Epoch(val) [11][15590]	mAP: 0.0042
+2025-05-09 07:09:33,527 - mmrotate - INFO - Saving checkpoint at 12 epochs
+2025-05-09 07:23:48,193 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48738  | 0.123  | 0.001 |
+| FCBK   | 11134 | 792977 | 0.084  | 0.001 |
+| Zigzag | 9050  | 571162 | 0.105  | 0.005 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 07:23:48,321 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 07:23:48,324 - mmrotate - INFO - Epoch(val) [12][15590]	mAP: 0.0027
+2025-05-09 07:40:52,427 - mmrotate - INFO - Saving checkpoint at 13 epochs
+2025-05-09 07:56:08,863 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48560  | 0.123  | 0.001 |
+| FCBK   | 11134 | 789986 | 0.086  | 0.002 |
+| Zigzag | 9050  | 569173 | 0.106  | 0.006 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 07:56:09,050 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 07:56:09,053 - mmrotate - INFO - Epoch(val) [13][15590]	mAP: 0.0028
+2025-05-09 08:13:46,624 - mmrotate - INFO - Saving checkpoint at 14 epochs
+2025-05-09 08:28:34,611 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48809  | 0.131  | 0.001 |
+| FCBK   | 11134 | 791796 | 0.085  | 0.002 |
+| Zigzag | 9050  | 566849 | 0.106  | 0.006 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 08:28:34,846 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 08:28:34,851 - mmrotate - INFO - Epoch(val) [14][15590]	mAP: 0.0032
+2025-05-09 08:45:31,124 - mmrotate - INFO - Saving checkpoint at 15 epochs
+2025-05-09 08:59:55,809 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 50157  | 0.128  | 0.001 |
+| FCBK   | 11134 | 797053 | 0.086  | 0.002 |
+| Zigzag | 9050  | 572877 | 0.105  | 0.007 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 08:59:55,962 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 08:59:55,966 - mmrotate - INFO - Epoch(val) [15][15590]	mAP: 0.0033
+2025-05-09 09:16:21,788 - mmrotate - INFO - Saving checkpoint at 16 epochs
+2025-05-09 09:30:24,961 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 49076  | 0.120  | 0.001 |
+| FCBK   | 11134 | 788753 | 0.086  | 0.002 |
+| Zigzag | 9050  | 564742 | 0.107  | 0.006 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 09:30:25,141 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 09:30:25,145 - mmrotate - INFO - Epoch(val) [16][15590]	mAP: 0.0031
+2025-05-09 09:47:37,509 - mmrotate - INFO - Saving checkpoint at 17 epochs
+2025-05-09 10:01:26,547 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48945  | 0.131  | 0.002 |
+| FCBK   | 11134 | 786418 | 0.085  | 0.002 |
+| Zigzag | 9050  | 560764 | 0.107  | 0.019 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.007 |
++--------+-------+--------+--------+-------+
+2025-05-09 10:01:26,736 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 10:01:26,738 - mmrotate - INFO - Epoch(val) [17][15590]	mAP: 0.0073
+2025-05-09 10:18:12,408 - mmrotate - INFO - Saving checkpoint at 18 epochs
+2025-05-09 10:32:24,948 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48923  | 0.126  | 0.002 |
+| FCBK   | 11134 | 782598 | 0.087  | 0.002 |
+| Zigzag | 9050  | 558887 | 0.106  | 0.019 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.007 |
++--------+-------+--------+--------+-------+
+2025-05-09 10:32:25,100 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 10:32:25,103 - mmrotate - INFO - Epoch(val) [18][15590]	mAP: 0.0073
+2025-05-09 10:49:57,632 - mmrotate - INFO - Saving checkpoint at 19 epochs
+2025-05-09 11:04:12,073 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48908  | 0.126  | 0.002 |
+| FCBK   | 11134 | 781274 | 0.087  | 0.002 |
+| Zigzag | 9050  | 555602 | 0.106  | 0.019 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.007 |
++--------+-------+--------+--------+-------+
+2025-05-09 11:04:12,211 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 11:04:12,214 - mmrotate - INFO - Epoch(val) [19][15590]	mAP: 0.0073
+2025-05-09 11:21:09,697 - mmrotate - INFO - Saving checkpoint at 20 epochs
+2025-05-09 11:34:27,701 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 49138  | 0.129  | 0.002 |
+| FCBK   | 11134 | 780173 | 0.088  | 0.002 |
+| Zigzag | 9050  | 555549 | 0.107  | 0.019 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.007 |
++--------+-------+--------+--------+-------+
+2025-05-09 11:34:27,854 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 11:34:27,857 - mmrotate - INFO - Epoch(val) [20][15590]	mAP: 0.0073
+2025-05-09 11:51:39,260 - mmrotate - INFO - Saving checkpoint at 21 epochs
+2025-05-09 12:06:23,300 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48842  | 0.133  | 0.002 |
+| FCBK   | 11134 | 777214 | 0.088  | 0.002 |
+| Zigzag | 9050  | 551725 | 0.109  | 0.019 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.007 |
++--------+-------+--------+--------+-------+
+2025-05-09 12:06:23,458 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 12:06:23,461 - mmrotate - INFO - Epoch(val) [21][15590]	mAP: 0.0074
+2025-05-09 12:22:51,806 - mmrotate - INFO - Saving checkpoint at 22 epochs
+2025-05-09 12:36:37,993 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 48848  | 0.136  | 0.002 |
+| FCBK   | 11134 | 778313 | 0.088  | 0.002 |
+| Zigzag | 9050  | 552026 | 0.107  | 0.007 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 12:36:38,142 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 12:36:38,145 - mmrotate - INFO - Epoch(val) [22][15590]	mAP: 0.0034
+2025-05-09 12:56:02,484 - mmrotate - INFO - Saving checkpoint at 23 epochs
+2025-05-09 13:13:17,129 - mmrotate - INFO - 
++--------+-------+--------+--------+-------+
+| class  | gts   | dets   | recall | ap    |
++--------+-------+--------+--------+-------+
+| CFCBK  | 649   | 49489  | 0.128  | 0.002 |
+| FCBK   | 11134 | 784254 | 0.088  | 0.002 |
+| Zigzag | 9050  | 554369 | 0.108  | 0.007 |
++--------+-------+--------+--------+-------+
+| mAP    |       |        |        | 0.003 |
++--------+-------+--------+--------+-------+
+2025-05-09 13:13:17,301 - mmrotate - INFO - Exp name: r3det_r50_fpn_1x_brickkiln_oc.py
+2025-05-09 13:13:17,321 - mmrotate - INFO - Epoch(val) [23][15590]	mAP: 0.0034
+2025-05-09 13:25:51,310 - mmrotate - INFO - Saving checkpoint at 24 epochs
